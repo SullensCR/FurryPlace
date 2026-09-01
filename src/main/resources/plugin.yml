@@ -5,6 +5,8 @@ api-version: '26.2'
 load: POSTWORLD
 depend:
   - packetevents
+softdepend:
+  - Multiverse-Core
 authors:
   - Furryplace
 description: One-time Furryplace building event.
