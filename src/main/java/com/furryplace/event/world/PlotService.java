@@ -450,7 +450,7 @@ public final class PlotService {
                 Material material;
                 if (interior && y < surfaceY) material = Material.DIRT;
                 else if (interior && y == surfaceY) material = Material.GRASS_BLOCK;
-                else if (!interior && (y == surfaceY || y == surfaceY - 1)) material = Material.ANDESITE;
+                else if (!interior) material = Material.ANDESITE;
                 else material = Material.AIR;
                 world.getBlockAt(bounds.originX() + relativeX, y, bounds.originZ() + relativeZ)
                     .setType(material, false);
