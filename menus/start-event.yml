@@ -1,0 +1,35 @@
+name: '-----------<blue>Furry</blue><light_purple>Place</light_purple>-----------'
+size: 54
+items:
+  btn-0:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+    slots:
+      - 0-9
+      - 17-18
+      - 26-27
+      - 35-36
+      - 44-48
+      - 50-53
+  btn-21:
+    slot: 21
+    item:
+      material: LIME_DYE
+      name: '<bold><green>Iniciar Evento</green></bold>'
+      lore:
+        - '<gray>Click para empezar el evento!</gray>'
+      glow: true
+  btn-23:
+    slot: 23
+    item:
+      material: CLOCK
+      name: '<bold><white>Tiempo: </white></bold><gold><bold>{} minutos</bold></gold>'
+      lore:
+        - "<dark_gray>Click izquierdo para incrementar 5 minutos</dark_gray>\r"
+        - "<dark_gray>Click derecho para disminuir 5 minutos</dark_gray>\r"
+        - '<dark_gray>Shift click izquierdo para elegir un temporalizador especifico</dark_gray>'
+  btn-49:
+    slot: 49
+    item:
+      material: BARRIER
+      name: '<red><bold>Cerrar</bold></red>'

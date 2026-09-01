@@ -1,0 +1,34 @@
+name: '-----------<blue>Furry</blue><light_purple>Place</light_purple>-----------'
+size: 54
+items:
+  border:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+      name: ' '
+    slots: [0-9, 17-18, 26-27, 35-36, 44-48, 50-53]
+  start:
+    slot: 21
+    action: EVENT_START_CONFIRM
+    item:
+      material: LIME_DYE
+      name: '<bold><green>Iniciar evento</green></bold>'
+      lore:
+        - '<gray>Click para empezar el evento.</gray>'
+      glow: true
+  duration:
+    slot: 23
+    action: EVENT_DURATION
+    item:
+      material: CLOCK
+      name: '<bold><white>Tiempo: </white><gold><minutes> minutos</gold></bold>'
+      lore:
+        - '<dark_gray>Click izquierdo: aumentar 5 minutos</dark_gray>'
+        - '<dark_gray>Click derecho: disminuir 5 minutos</dark_gray>'
+        - '<dark_gray>Shift + click izquierdo: tiempo personalizado</dark_gray>'
+  close:
+    slot: 49
+    action: CLOSE
+    item:
+      material: BARRIER
+      name: '<red><bold>Cerrar</bold></red>'
+

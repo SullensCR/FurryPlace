@@ -1,0 +1,12 @@
+name: '<gold>Jurado Furryplace</gold>'
+size: 54
+items:
+  browse:
+    slot: 22
+    action: OPEN_JUDGE
+    item: {material: PLAYER_HEAD, name: '<yellow>Evaluar parcelas</yellow>'}
+  close:
+    slot: 49
+    action: CLOSE
+    item: {material: BARRIER, name: '<red>Cerrar</red>'}
+

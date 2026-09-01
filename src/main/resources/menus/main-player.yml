@@ -1,0 +1,27 @@
+name: '<blue>Furry</blue><light_purple>Place</light_purple>'
+size: 54
+items:
+  join:
+    slot: 20
+    action: JOIN_OWN
+    item:
+      material: GRASS_BLOCK
+      name: '<green>Mi parcela</green>'
+      lore: ['<gray>Entrar o regresar a tu parcela.</gray>']
+  browse:
+    slot: 22
+    action: OPEN_BROWSE
+    item:
+      material: PLAYER_HEAD
+      name: '<aqua>Explorar y votar</aqua>'
+  tools:
+    slot: 24
+    action: OPEN_TOOLS
+    item:
+      material: BREEZE_ROD
+      name: '<yellow>Herramientas</yellow>'
+  close:
+    slot: 49
+    action: CLOSE
+    item: {material: BARRIER, name: '<red>Cerrar</red>'}
+

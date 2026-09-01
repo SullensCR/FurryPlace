@@ -1,0 +1,10 @@
+name: '<blue>Furry</blue><light_purple>Place</light_purple>'
+size: 27
+items:
+  status:
+    slot: 13
+    item:
+      material: CLOCK
+      name: '<yellow>El evento todavía no ha comenzado.</yellow>'
+      lore: ['<gray>Espera el anuncio del servidor.</gray>']
+  close: {slot: 22, action: CLOSE, item: {material: BARRIER, name: '<red>Cerrar</red>'}}

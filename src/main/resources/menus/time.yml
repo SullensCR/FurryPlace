@@ -1,0 +1,10 @@
+name: '<gold>Tiempo de la parcela</gold>'
+size: 27
+items:
+  dawn: {slot: 10, action: TIME_DAWN, item: {material: ORANGE_DYE, name: '<gold>Amanecer</gold>'}}
+  day: {slot: 11, action: TIME_DAY, item: {material: YELLOW_DYE, name: '<yellow>Día</yellow>'}}
+  noon: {slot: 12, action: TIME_NOON, item: {material: SUNFLOWER, name: '<yellow>Mediodía</yellow>'}}
+  sunset: {slot: 14, action: TIME_SUNSET, item: {material: RED_DYE, name: '<red>Atardecer</red>'}}
+  night: {slot: 15, action: TIME_NIGHT, item: {material: BLUE_DYE, name: '<blue>Noche</blue>'}}
+  midnight: {slot: 16, action: TIME_MIDNIGHT, item: {material: BLACK_DYE, name: '<dark_blue>Medianoche</dark_blue>'}}
+

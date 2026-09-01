@@ -1,0 +1,8 @@
+name: '<gold>Seleccionar ganador</gold> <gray>(<page>/<pages>)</gray>'
+size: 54
+dynamic-slots: [10-16, 19-25, 28-34, 37-43]
+items:
+  previous: {slot: 45, action: PAGE_PREVIOUS, item: {material: ARROW, name: '<yellow>Página anterior</yellow>'}}
+  search: {slot: 48, action: SEARCH, item: {material: OAK_SIGN, name: '<aqua>Buscar</aqua>'}}
+  close: {slot: 49, action: CLOSE, item: {material: BARRIER, name: '<red>Cerrar</red>'}}
+  next: {slot: 53, action: PAGE_NEXT, item: {material: ARROW, name: '<yellow>Página siguiente</yellow>'}}

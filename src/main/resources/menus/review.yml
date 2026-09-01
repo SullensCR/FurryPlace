@@ -1,0 +1,9 @@
+name: '<gold>Control de revisión</gold>'
+size: 27
+items:
+  previous: {slot: 10, action: REVIEW_PREVIOUS, item: {material: ARROW, name: '<yellow>Anterior</yellow>'}}
+  takeover: {slot: 12, action: REVIEW_TAKEOVER, item: {material: LEAD, name: '<aqua>Tomar control</aqua>'}}
+  end: {slot: 14, action: REVIEW_END, item: {material: EMERALD_BLOCK, name: '<green>Terminar revisión</green>'}}
+  next: {slot: 16, action: REVIEW_NEXT, item: {material: ARROW, name: '<yellow>Siguiente</yellow>'}}
+  close: {slot: 22, action: CLOSE, item: {material: BARRIER, name: '<red>Cerrar</red>'}}
+

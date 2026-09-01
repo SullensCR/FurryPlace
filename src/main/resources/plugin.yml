@@ -1,0 +1,24 @@
+name: FurryplaceEvent
+version: '1.0.0'
+main: com.furryplace.event.FurryplaceEventPlugin
+api-version: '26.2'
+load: POSTWORLD
+depend:
+  - packetevents
+authors:
+  - Furryplace
+description: One-time Furryplace building event.
+commands:
+  furryplace:
+    description: Controla y participa en el evento Furryplace.
+    usage: /furryplace <join|menu|browse|view|tool|winner|set-spawn|portal-wand|template|reset>
+permissions:
+  furryplace.player:
+    description: Permite participar en el evento.
+    default: true
+  furryplace.judge:
+    description: Permite votar como juez.
+    default: false
+  furryplace.admin:
+    description: Permite administrar el evento.
+    default: op

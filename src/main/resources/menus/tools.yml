@@ -1,0 +1,20 @@
+name: '<yellow>Herramientas de parcela</yellow>'
+size: 27
+items:
+  weather:
+    slot: 11
+    action: GIVE_WEATHER
+    item: {material: BREEZE_ROD, name: '<color:#e3ff59>Cambiar el clima</color>'}
+  time:
+    slot: 13
+    action: GIVE_TIME
+    item: {material: FEATHER, name: '<color:#e3ff59>Cambiar el tiempo</color>'}
+  biome:
+    slot: 15
+    action: GIVE_BIOME
+    item: {material: STICK, name: '<color:#e3ff59>Cambiar el bioma</color>'}
+  back:
+    slot: 22
+    action: BACK_MAIN
+    item: {material: ARROW, name: '<yellow>Volver</yellow>'}
+

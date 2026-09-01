@@ -1,0 +1,20 @@
+name: '<red>Administrar Furryplace</red>'
+size: 54
+items:
+  primary:
+    slot: 20
+    action: ADMIN_PRIMARY
+    item: {material: NETHER_STAR, name: '<green>Control del evento</green>'}
+  browse:
+    slot: 22
+    action: OPEN_BROWSE
+    item: {material: PLAYER_HEAD, name: '<aqua>Parcelas</aqua>'}
+  reset:
+    slot: 24
+    action: RESET_CONFIRM
+    item: {material: TNT, name: '<red>Cancelar y reiniciar</red>'}
+  close:
+    slot: 49
+    action: CLOSE
+    item: {material: BARRIER, name: '<red>Cerrar</red>'}
+

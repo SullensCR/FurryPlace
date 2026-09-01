@@ -1,0 +1,13 @@
+name: '<gold>Evento completado</gold>'
+size: 27
+items:
+  winner:
+    slot: 11
+    action: VIEW_WINNER
+    item:
+      material: NETHER_STAR
+      name: '<gold>Ganador: <winner></gold>'
+      lore: ['<aqua>Votos de la comunidad: <votes></aqua>', '<gray>Click para visitar.</gray>']
+      glow: true
+  browse: {slot: 15, action: OPEN_BROWSE, item: {material: PLAYER_HEAD, name: '<aqua>Explorar parcelas</aqua>'}}
+  close: {slot: 22, action: CLOSE, item: {material: BARRIER, name: '<red>Cerrar</red>'}}

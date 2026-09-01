@@ -1,0 +1,6 @@
+name: '<red>Confirmar acción</red>'
+size: 27
+items:
+  confirm: {slot: 11, action: CONFIRM, item: {material: LIME_DYE, name: '<green>Confirmar</green>'}}
+  cancel: {slot: 15, action: CLOSE, item: {material: RED_DYE, name: '<red>Cancelar</red>'}}
+

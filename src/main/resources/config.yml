@@ -1,0 +1,38 @@
+worlds:
+  lobby: lobby
+  plots: place
+  template: place-template
+
+plots:
+  size: 80
+  spacing: 1024
+  maximum: 50
+  surface-y: 80
+  boundary-width: 2
+  entity-limit: 50
+
+timer:
+  default-minutes: 20
+  minimum-start-minutes: 5
+  minimum-active-minutes: 1
+  maximum-minutes: 180
+
+operations:
+  max-blocks-per-tick: 20000
+  max-millis-per-tick: 4
+
+presentation:
+  xp-level: 2026
+  warning-cooldown-seconds: 5
+  review-actionbar-period-ticks: 20
+
+portal:
+  flood-fill-limit: 1024
+  pushback-horizontal: 1.15
+  pushback-upward: 0.18
+
+void-recovery:
+  horizontal-cap: 2.5
+  upward-velocity: 2.8
+  cooldown-ticks: 60
+

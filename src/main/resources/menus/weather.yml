@@ -1,0 +1,16 @@
+name: '<aqua>Clima de la parcela</aqua>'
+size: 27
+items:
+  clear:
+    slot: 11
+    action: WEATHER_CLEAR
+    item: {material: SUNFLOWER, name: '<yellow>Despejado</yellow>'}
+  rain:
+    slot: 13
+    action: WEATHER_RAIN
+    item: {material: WATER_BUCKET, name: '<blue>Lluvia</blue>'}
+  thunder:
+    slot: 15
+    action: WEATHER_THUNDER
+    item: {material: LIGHTNING_ROD, name: '<dark_aqua>Tormenta</dark_aqua>'}
+
