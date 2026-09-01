@@ -3,11 +3,6 @@ config-version: '${project.version}'
 name: '-----------<blue>Furry</blue><light_purple>Place</light_purple>-----------'
 size: 54
 items:
-  border:
-    item:
-      material: BLACK_STAINED_GLASS_PANE
-      name: ' '
-    slots: [0-9, 17-18, 26-27, 35-36, 44-48, 50-53]
   start:
     slot: 21
     action: EVENT_START_CONFIRM

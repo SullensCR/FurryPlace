@@ -82,7 +82,7 @@ public final class MenuService implements Listener {
 
     private record SlotAction(String action, String payload, String sound) {}
     private record Definition(String name, int size, List<Integer> dynamicSlots, List<ConfiguredItem> items) {}
-    private record ConfiguredItem(List<Integer> slots, String action, Material material, String name,
+    private record ConfiguredItem(String id, List<Integer> slots, String action, Material material, String name,
                                   List<String> lore, boolean glow, String sound) {}
     private record DynamicEntry(String payload, String search, ItemStack item) {}
 
@@ -136,7 +136,9 @@ public final class MenuService implements Listener {
         Holder holder = new Holder(menu, boundedPage, query, returnMenu);
         Inventory inventory = Bukkit.createInventory(holder, definition.size(), miniMessage.deserialize(definition.name(), placeholders));
         holder.inventory = inventory;
+        applyUniversalPattern(inventory);
         for (ConfiguredItem configured : definition.items()) {
+            if (menu.equals("start-event") && configured.id().equals("border")) continue;
             ItemStack item = item(configured.material(), configured.name(), configured.lore(), configured.glow(), placeholders);
             for (int slot : configured.slots()) {
                 if (slot < 0 || slot >= inventory.getSize()) continue;
@@ -305,7 +307,7 @@ public final class MenuService implements Listener {
             NamespacedKey soundKey = NamespacedKey.fromString(sound);
             if (soundKey == null || Registry.SOUNDS.get(soundKey) == null) throw invalid(menu, path + ".sound", "sonido inválido");
         }
-        return new ConfiguredItem(slots, action, material, itemName, lore,
+        return new ConfiguredItem(section.getName(), slots, action, material, itemName, lore,
             item.getBoolean("glow"), sound);
     }
 
@@ -337,6 +339,16 @@ public final class MenuService implements Listener {
         }
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    private void applyUniversalPattern(Inventory inventory) {
+        ItemStack pane = item(Material.GRAY_STAINED_GLASS_PANE, messages.raw("menu-items.pattern-name", " "),
+            List.of(), false, TagResolver.empty());
+        int size = inventory.getSize();
+        for (int slot = 0; slot < size; slot++) {
+            int column = slot % 9;
+            if (slot < 9 || slot >= size - 9 || column == 0 || column == 8) inventory.setItem(slot, pane.clone());
+        }
     }
 
     private String required(ConfigurationSection section, String path, String menu) {

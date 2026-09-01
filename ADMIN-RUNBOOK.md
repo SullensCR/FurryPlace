@@ -4,8 +4,8 @@
 
 1. Stop the server and back up `lobby`, `place`, and `place-template`.
 2. Install PacketEvents 2.13.0 in the server's `plugins` folder.
-3. Copy `FurryplaceEvent-1.0.2.jar` into `plugins` and start Leaf 26.2.
-4. Confirm the console prints `FurryplaceEvent 1.0.2 está listo.`
+3. Copy `FurryplaceEvent-1.0.3.jar` into `plugins` and start Leaf 26.2.
+4. Confirm the console prints `FurryplaceEvent 1.0.3 está listo.`
 
 Every player receives the persistent FurryPlace menu Nether Star in hotbar slot 8. It remains available in every world and opens the same menu as `/furryplace menu`.
 

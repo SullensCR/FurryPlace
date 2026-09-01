@@ -90,6 +90,7 @@ items:
     - '<gray>Click derecho para cambiar</gray>'
     - '<gray>la coloración de tu parcela!</gray>'
 menu-items:
+  pattern-name: ' '
   participant-name: '<yellow><player></yellow>'
   participant-plot: '<gray>Parcela <plot></gray>'
   participant-votes: '<aqua>Votos: <votes></aqua>'
