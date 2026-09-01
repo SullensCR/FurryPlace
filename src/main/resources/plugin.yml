@@ -1,5 +1,5 @@
 name: FurryplaceEvent
-version: '1.0.0'
+version: '${project.version}'
 main: com.furryplace.event.FurryplaceEventPlugin
 api-version: '26.2'
 load: POSTWORLD

@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 worlds:
   lobby: lobby
   plots: place

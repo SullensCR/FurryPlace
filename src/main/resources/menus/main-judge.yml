@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<gold>Jurado Furryplace</gold>'
 size: 54
 items:
@@ -9,4 +11,3 @@ items:
     slot: 49
     action: CLOSE
     item: {material: BARRIER, name: '<red>Cerrar</red>'}
-

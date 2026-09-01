@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 names:
   minecraft:
     badlands: 'Tierras baldías'

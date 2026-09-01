@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<gold>Votación del jurado</gold> <gray>(<page>/<pages>)</gray>'
 size: 54
 dynamic-slots: [10-16, 19-25, 28-34, 37-43]

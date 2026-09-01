@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<red>Administrar Furryplace</red>'
 size: 54
 items:
@@ -17,4 +19,3 @@ items:
     slot: 49
     action: CLOSE
     item: {material: BARRIER, name: '<red>Cerrar</red>'}
-

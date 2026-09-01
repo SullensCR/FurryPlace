@@ -6,7 +6,7 @@
 
     <groupId>com.furryplace</groupId>
     <artifactId>furryplace-event</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>FurryplaceEvent</name>
     <description>One-time Furryplace building event plugin for Leaf 26.2.</description>
 
@@ -62,6 +62,12 @@
 
     <build>
         <finalName>FurryplaceEvent-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

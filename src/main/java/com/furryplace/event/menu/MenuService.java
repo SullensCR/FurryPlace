@@ -2,6 +2,7 @@ package com.furryplace.event.menu;
 
 import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
+import com.furryplace.event.config.ConfigurationMigrationService;
 import com.furryplace.event.packet.PacketBridge;
 import com.furryplace.event.service.MessageService;
 import net.kyori.adventure.text.Component;
@@ -59,9 +60,7 @@ public final class MenuService implements Listener {
         "REVIEW_END", "REVIEW_NEXT"
     );
 
-    private static final List<String> FILES = List.of("start-event", "inactive-info", "complete", "main-player", "main-admin", "main-judge",
-        "browser", "judge-browser", "review-start-browser", "winner-browser", "tools", "weather", "time",
-        "biome", "review", "confirm");
+    private static final List<String> FILES = ConfigurationMigrationService.MENU_NAMES;
 
     private static final class Holder implements InventoryHolder {
         private final String menu;
@@ -101,7 +100,6 @@ public final class MenuService implements Listener {
         this.state = state;
         this.packets = packets;
         this.messages = messages;
-        installDefaults();
         loadBiomeNames();
         reload();
     }
@@ -354,15 +352,6 @@ public final class MenuService implements Listener {
     private String humanize(String key) {
         return Arrays.stream(key.split("_")).map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
             .reduce((left, right) -> left + " " + right).orElse(key);
-    }
-
-    private void installDefaults() {
-        File biomeNamesFile = new File(plugin.getDataFolder(), "biome-names.yml");
-        if (!biomeNamesFile.isFile()) plugin.saveResource("biome-names.yml", false);
-        for (String name : FILES) {
-            File target = new File(plugin.getDataFolder(), "menus/" + name + ".yml");
-            if (!target.isFile()) plugin.saveResource("menus/" + name + ".yml", false);
-        }
     }
 
     private void loadBiomeNames() {

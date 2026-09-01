@@ -1,6 +1,7 @@
 package com.furryplace.event;
 
 import com.furryplace.event.command.FurryplaceCommand;
+import com.furryplace.event.config.ConfigurationMigrationService;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.item.WandService;
 import com.furryplace.event.menu.MenuService;
@@ -32,8 +33,14 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        if (!new java.io.File(getDataFolder(), "messages.yml").isFile()) saveResource("messages.yml", false);
+        try {
+            new ConfigurationMigrationService(this).migrate();
+            reloadConfig();
+        } catch (java.io.IOException exception) {
+            getLogger().severe("No se pudieron preparar las configuraciones versionadas: " + exception.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         String plotsWorld = getConfig().getString("worlds.plots", "place");
         String templateWorld = getConfig().getString("worlds.template", "place-template");

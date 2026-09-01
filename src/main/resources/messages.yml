@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 prefix: '<dark_gray>[<blue>Furry</blue><light_purple>Place</light_purple>]</dark_gray> '
 errors:
   no-permission: '<red>No tienes permiso para hacer eso.</red>'

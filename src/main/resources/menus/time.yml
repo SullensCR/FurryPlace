@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<gold>Tiempo de la parcela</gold>'
 size: 27
 items:
@@ -7,4 +9,3 @@ items:
   sunset: {slot: 14, action: TIME_SUNSET, item: {material: RED_DYE, name: '<red>Atardecer</red>'}}
   night: {slot: 15, action: TIME_NIGHT, item: {material: BLUE_DYE, name: '<blue>Noche</blue>'}}
   midnight: {slot: 16, action: TIME_MIDNIGHT, item: {material: BLACK_DYE, name: '<dark_blue>Medianoche</dark_blue>'}}
-

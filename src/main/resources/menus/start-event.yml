@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '-----------<blue>Furry</blue><light_purple>Place</light_purple>-----------'
 size: 54
 items:
@@ -31,4 +33,3 @@ items:
     item:
       material: BARRIER
       name: '<red><bold>Cerrar</bold></red>'
-

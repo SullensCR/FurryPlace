@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<aqua>Clima de la parcela</aqua>'
 size: 27
 items:
@@ -13,4 +15,3 @@ items:
     slot: 15
     action: WEATHER_THUNDER
     item: {material: LIGHTNING_ROD, name: '<dark_aqua>Tormenta</dark_aqua>'}
-

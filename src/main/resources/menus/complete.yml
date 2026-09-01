@@ -1,3 +1,5 @@
+config-version: '${project.version}'
+
 name: '<gold>Evento completado</gold>'
 size: 27
 items:

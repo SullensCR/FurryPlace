@@ -18,6 +18,10 @@ The plugin does not create missing worlds. If `place` or `place-template` is mis
 
 Do not stop the server while setup is running unless necessary. If it does stop, the journal restarts the interrupted job safely on the next startup.
 
+## Actualizaciones de configuración
+
+All editable YAML files are versioned. When you install a newer plugin JAR, it backs up every older configuration it updates to `plugins/FurryplaceEvent/backups/<UTC timestamp>/`, writes the new defaults, and carries your existing values into the new files. New settings are added automatically; no manual reconfiguration is needed. Do not edit files inside `backups`; they are recovery copies.
+
 ## Run the event
 
 1. Run `/furryplace menu` as an Admin.
