@@ -7,6 +7,7 @@ import com.furryplace.event.packet.PacketBridge;
 import com.furryplace.event.service.MessageService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
@@ -331,8 +332,11 @@ public final class MenuService implements Listener {
     private ItemStack item(Material material, String name, List<String> lore, boolean glow, TagResolver placeholders) {
         ItemStack stack = new ItemStack(material);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(miniMessage.deserialize(name.replace("\r", ""), placeholders));
-        if (!lore.isEmpty()) meta.lore(lore.stream().map(line -> miniMessage.deserialize(line.replace("\r", ""), placeholders)).toList());
+        meta.displayName(miniMessage.deserialize(name.replace("\r", ""), placeholders)
+            .decoration(TextDecoration.ITALIC, false));
+        if (!lore.isEmpty()) meta.lore(lore.stream()
+            .map(line -> miniMessage.deserialize(line.replace("\r", ""), placeholders)
+                .decoration(TextDecoration.ITALIC, false)).toList());
         if (glow) {
             meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

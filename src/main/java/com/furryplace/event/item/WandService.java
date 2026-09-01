@@ -6,7 +6,6 @@ import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.menu.MenuService;
 import com.furryplace.event.service.MessageService;
 import com.furryplace.event.world.PlotService;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -45,7 +44,6 @@ public final class WandService implements Listener {
     private final MenuService menus;
     private final MessageService messages;
     private final NamespacedKey key;
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public WandService(JavaPlugin plugin, RuntimeState state, PlotService plots, MenuService menus,
                        MessageService messages) {
@@ -119,8 +117,8 @@ public final class WandService implements Listener {
     private ItemStack create(Type type) {
         ItemStack item = new ItemStack(type.material);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(messages.component("items." + type.messagePrefix + "-wand-name"));
-        meta.lore(messages.componentList("items." + type.messagePrefix + "-wand-lore", java.util.Map.of()));
+        meta.displayName(messages.itemComponent("items." + type.messagePrefix + "-wand-name"));
+        meta.lore(messages.itemComponentList("items." + type.messagePrefix + "-wand-lore", java.util.Map.of()));
         meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
         item.setItemMeta(meta);
         return item;

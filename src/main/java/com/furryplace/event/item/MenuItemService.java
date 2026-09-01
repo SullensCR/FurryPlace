@@ -190,8 +190,8 @@ public final class MenuItemService implements Listener {
     private ItemStack createMenuItem() {
         ItemStack item = new ItemStack(Material.NETHER_STAR);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(messages.component("items.menu-name"));
-        meta.lore(messages.componentList("items.menu-lore", Map.of()));
+        meta.displayName(messages.itemComponent("items.menu-name"));
+        meta.lore(messages.itemComponentList("items.menu-lore", Map.of()));
         meta.getPersistentDataContainer().set(itemKey, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);
         return item;

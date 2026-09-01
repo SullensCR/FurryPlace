@@ -499,6 +499,7 @@ Required menu groups include:
 ## Messages and cooldowns
 
 - All chat, titles, subtitles, Action Bars, item names/lore, menu text, warnings, and announcements use MiniMessage strings loaded from YAML.
+- Item names and lore default to non-italic; a message must explicitly use `<i>...</i>` to enable italics.
 - Warning cooldowns are tracked per player and per message key for five seconds.
 - One warning category must not suppress a different warning.
 - Countdown thresholds are separate message keys, allowing the 5-to-1 second countdown to display correctly.

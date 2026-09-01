@@ -350,8 +350,8 @@ public final class ProtectionListener implements Listener {
     private ItemStack token(String token) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(messages.component("items.blocked-name"));
-        meta.lore(messages.componentList("items.blocked-lore", Map.of()));
+        meta.displayName(messages.itemComponent("items.blocked-name"));
+        meta.lore(messages.itemComponentList("items.blocked-lore", Map.of()));
         meta.getPersistentDataContainer().set(blockedToken, PersistentDataType.STRING, token);
         item.setItemMeta(meta);
         return item;

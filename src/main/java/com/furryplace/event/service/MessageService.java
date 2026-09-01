@@ -1,6 +1,7 @@
 package com.furryplace.event.service;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -52,6 +53,19 @@ public final class MessageService {
 
     public List<Component> componentList(String path, Map<String, ?> replacements) {
         return messages.getStringList(path).stream().map(line -> parse(line, replacements)).toList();
+    }
+
+    public Component itemComponent(String path) {
+        return itemComponent(path, Map.of());
+    }
+
+    public Component itemComponent(String path, Map<String, ?> replacements) {
+        return component(path, replacements).decoration(TextDecoration.ITALIC, false);
+    }
+
+    public List<Component> itemComponentList(String path, Map<String, ?> replacements) {
+        return componentList(path, replacements).stream()
+            .map(component -> component.decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     public void send(CommandSender sender, String path) {

@@ -69,7 +69,7 @@ public final class PortalService implements Listener {
     public void giveWand(Player player) {
         ItemStack item = new ItemStack(Material.FEATHER);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(messages.component("items.portal-wand-name"));
+        meta.displayName(messages.itemComponent("items.portal-wand-name"));
         meta.getPersistentDataContainer().set(wandKey, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);
         player.getInventory().addItem(item).values().forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
