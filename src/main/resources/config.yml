@@ -28,11 +28,10 @@ presentation:
 
 portal:
   flood-fill-limit: 1024
-  pushback-horizontal: 1.15
-  pushback-upward: 0.18
+  pushback-horizontal: 4.0
+  pushback-upward: 0.35
 
 void-recovery:
   horizontal-cap: 2.5
   upward-velocity: 2.8
   cooldown-ticks: 60
-
