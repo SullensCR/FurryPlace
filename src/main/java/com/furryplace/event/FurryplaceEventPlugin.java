@@ -95,7 +95,7 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
         operations.start();
         plots.recoverInterruptedOperations();
         coordinator.startTicker();
-        getLogger().info("FurryplaceEvent 1.0.0 está listo.");
+        getLogger().info("FurryplaceEvent " + getDescription().getVersion() + " está listo.");
     }
 
     @Override
