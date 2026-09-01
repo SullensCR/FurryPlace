@@ -18,7 +18,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,6 +32,9 @@ import java.util.ArrayDeque;
 import java.util.LinkedHashSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public final class PortalService implements Listener {
     public interface Router { void route(Player player, EventStage stage); }
@@ -44,6 +49,7 @@ public final class PortalService implements Listener {
     private final MessageService messages;
     private final NamespacedKey wandKey;
     private final int limit;
+    private final Map<UUID, Long> handledUntil = new HashMap<>();
     private Router router;
 
     public PortalService(JavaPlugin plugin, RuntimeState state, StateRepository repository, MessageService messages) {
@@ -53,6 +59,9 @@ public final class PortalService implements Listener {
         this.messages = messages;
         wandKey = new NamespacedKey(plugin, "portal_wand");
         limit = plugin.getConfig().getInt("portal.flood-fill-limit", 1024);
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> Bukkit.getOnlinePlayers().forEach(player -> {
+            if (isOnControlledPortal(player.getLocation())) handleEntry(player);
+        }), 1L, 1L);
     }
 
     public void router(Router value) { router = value; }
@@ -89,15 +98,33 @@ public final class PortalService implements Listener {
         messages.send(player, "portal.selected");
     }
 
-    @EventHandler
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST)
     public void onPortal(PlayerPortalEvent event) {
-        Location from = event.getFrom();
-        WorldBlockKey key = new WorldBlockKey(from.getWorld().getName(), from.getBlockX(), from.getBlockY(), from.getBlockZ());
-        if (!state.portalBlocks().contains(key)) return;
+        if (!isOnControlledPortal(event.getFrom())) return;
         event.setCancelled(true);
-        Player player = event.getPlayer();
+        handleEntry(event.getPlayer());
+    }
+
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        Location to = event.getTo();
+        if (to == null || !isOnControlledPortal(to)) return;
+        event.setCancelled(true);
+        handleEntry(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        handledUntil.remove(event.getPlayer().getUniqueId());
+    }
+
+    private void handleEntry(Player player) {
+        long now = Bukkit.getCurrentTick();
+        long until = handledUntil.getOrDefault(player.getUniqueId(), 0L);
+        if (until > now) return;
+        handledUntil.put(player.getUniqueId(), now + 10L);
         if (!validSelection()) {
-            messages.send(player, "portal.broken");
+            messages.warn(player, "portal.broken");
             for (Player online : Bukkit.getOnlinePlayers()) {
                 if (online.hasPermission("furryplace.admin")) messages.warn(online, "portal.broken");
             }
@@ -109,10 +136,21 @@ public final class PortalService implements Listener {
             look.normalize().multiply(-plugin.getConfig().getDouble("portal.pushback-horizontal", 1.15));
             look.setY(plugin.getConfig().getDouble("portal.pushback-upward", 0.18));
             player.setVelocity(look);
-            messages.send(player, "event.inactive");
+            messages.warn(player, "event.inactive");
             return;
         }
         if (router != null) router.route(player, state.stage());
+    }
+
+    private boolean isOnControlledPortal(Location location) {
+        if (location == null || location.getWorld() == null || state.portalBlocks().isEmpty()) return false;
+        String world = location.getWorld().getName();
+        int x = location.getBlockX();
+        int y = location.getBlockY();
+        int z = location.getBlockZ();
+        return state.portalBlocks().contains(new WorldBlockKey(world, x, y, z))
+            || state.portalBlocks().contains(new WorldBlockKey(world, x, y + 1, z))
+            || state.portalBlocks().contains(new WorldBlockKey(world, x, y - 1, z));
     }
 
     private Set<WorldBlockKey> floodFill(Block start) {

@@ -1,6 +1,6 @@
 config-version: '${project.version}'
 
-prefix: '<dark_gray>[<blue>Furry</blue><light_purple>Place</light_purple>]</dark_gray> '
+prefix: '<b><aqua>Furry</aqua><light_purple>Place</light_purple></b> <b><dark_gray>» '
 errors:
   no-permission: '<red>No tienes permiso para hacer eso.</red>'
   player-only: '<red>Este comando solamente puede ser usado por un jugador.</red>'
@@ -68,6 +68,10 @@ winner:
   title: '<gold>¡Ganador!</gold>'
   subtitle: '<yellow><player></yellow>'
 items:
+  menu-name: '<yellow><b>Menu de FurryPlace</b></yellow>'
+  menu-lore:
+    - ''
+    - '<dark_gray>Click para abrir el menu del evento!</dark_gray>'
   blocked-name: '<red>Objeto bloqueado</red>'
   blocked-lore:
     - '<gray>Este objeto no está permitido</gray>'

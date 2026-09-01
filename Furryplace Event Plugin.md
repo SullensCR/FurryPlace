@@ -305,6 +305,7 @@ Then load that player's persistent event inventory/state and set them to Creativ
 - The plugin detects and persists every connected portal block in that portal opening.
 - Selecting another portal replaces the previous selection.
 - The controlled portal never performs normal Nether travel.
+- Portal contact is detected while the player is standing on or within the selected portal blocks, including Survival, before normal Nether travel can begin.
 
 Portal routing is internal and does not execute command text:
 
@@ -471,6 +472,7 @@ Player-only commands return a clear Spanish error to non-player senders rather t
 
 ## Menus and text input
 
+- Every player always has a tagged Nether Star in hotbar slot 8 named `<yellow><b>Menu de FurryPlace</b></yellow>`. Left-click, right-click, and inventory interactions with it open the same stage- and role-specific menu as `/furryplace menu`; it is restored on every world and inventory transition.
 - Menus are runtime-configurable from YAML.
 - YAML controls inventory size, title, materials, names, lore, slots, glow, and optional sounds.
 - Code owns a fixed validated set of action IDs; YAML cannot execute arbitrary commands or code.

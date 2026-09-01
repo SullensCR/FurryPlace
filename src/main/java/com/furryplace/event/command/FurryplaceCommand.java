@@ -134,7 +134,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
         }
     }
 
-    private void openMain(Player player) {
+    public void openMain(Player player) {
         if (state.stage() == EventStage.INACTIVE && Role.resolve(player) != Role.ADMIN) {
             menus.open(player, "inactive-info");
             return;

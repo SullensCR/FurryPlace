@@ -21,7 +21,7 @@ class ResourceYamlTest {
     void everyBundledMenuIsReadableAndHasValidInventoryGeometry() {
         for (String menu : MENUS) {
             YamlConfiguration yaml = load("menus/" + menu + ".yml");
-            assertEquals("1.0.1", yaml.getString("config-version"), menu);
+            assertEquals("1.0.2", yaml.getString("config-version"), menu);
             assertNotNull(yaml.getString("name"), menu);
             int size = yaml.getInt("size");
             assertTrue(size >= 9 && size <= 54 && size % 9 == 0, menu);
@@ -31,11 +31,14 @@ class ResourceYamlTest {
 
     @Test
     void primaryResourcesAreReadable() {
-        assertEquals("1.0.1", load("config.yml").getString("config-version"));
+        assertEquals("1.0.2", load("config.yml").getString("config-version"));
         assertEquals("lobby", load("config.yml").getString("worlds.lobby"));
-        assertEquals("1.0.1", load("messages.yml").getString("config-version"));
+        assertEquals("1.0.2", load("messages.yml").getString("config-version"));
+        assertEquals("<yellow><b>Menu de FurryPlace</b></yellow>", load("messages.yml").getString("items.menu-name"));
+        assertEquals(java.util.List.of("", "<dark_gray>Click para abrir el menu del evento!</dark_gray>"),
+            load("messages.yml").getStringList("items.menu-lore"));
         assertNotNull(load("messages.yml").getString("winner.chat"));
-        assertEquals("1.0.1", load("biome-names.yml").getString("config-version"));
+        assertEquals("1.0.2", load("biome-names.yml").getString("config-version"));
         assertNotNull(load("biome-names.yml").getConfigurationSection("names.minecraft"));
         assertEquals("com.furryplace.event.FurryplaceEventPlugin", load("plugin.yml").getString("main"));
     }

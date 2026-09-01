@@ -4,6 +4,7 @@ import com.furryplace.event.command.FurryplaceCommand;
 import com.furryplace.event.config.ConfigurationMigrationService;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.item.WandService;
+import com.furryplace.event.item.MenuItemService;
 import com.furryplace.event.menu.MenuService;
 import com.furryplace.event.packet.PacketBridge;
 import com.furryplace.event.persistence.OrderedDataWriter;
@@ -79,11 +80,13 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
         ProtectionListener protection = new ProtectionListener(this, new AccessPolicy(state, plots), plots, messages, wands);
         FurryplaceCommand command = new FurryplaceCommand(state, repository, coordinator, plots, lifecycle, portal,
             wands, menus, packets, messages);
+        MenuItemService menuItem = new MenuItemService(this, messages, command::openMain);
         menus.actions(command);
         coordinator.hooks(new EventRuntimeHooks(this, state, plots, lifecycle, playerStates, messages));
 
         Bukkit.getPluginManager().registerEvents(menus, this);
         Bukkit.getPluginManager().registerEvents(wands, this);
+        Bukkit.getPluginManager().registerEvents(menuItem, this);
         Bukkit.getPluginManager().registerEvents(portal, this);
         Bukkit.getPluginManager().registerEvents(protection, this);
         Bukkit.getPluginManager().registerEvents(lifecycle, this);
