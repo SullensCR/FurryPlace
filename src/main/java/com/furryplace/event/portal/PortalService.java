@@ -109,7 +109,12 @@ public final class PortalService implements Listener {
     public void onMove(PlayerMoveEvent event) {
         Location to = event.getTo();
         if (to == null || !isOnControlledPortal(to)) return;
-        event.setCancelled(true);
+        // Cancelling a move rewinds the player to the previous position. During
+        // the inactive stage that rewind cancels out the velocity we apply for
+        // portal pushback, making it look like a teleport instead of knockback.
+        // Let that movement complete so the server can apply the impulse. For
+        // active stages, retain cancellation while routing the portal entry.
+        if (state.stage() != EventStage.INACTIVE) event.setCancelled(true);
         handleEntry(event.getPlayer());
     }
 

@@ -4,8 +4,8 @@
 
 1. Stop the server and back up `lobby`, `place`, and `place-template`.
 2. Install PacketEvents 2.13.0 in the server's `plugins` folder.
-3. Copy `FurryplaceEvent-1.0.5.jar` into `plugins` and start Leaf 26.2.
-4. Confirm the console prints `FurryplaceEvent 1.0.5 está listo.`
+3. Copy `FurryplaceEvent-1.0.6.jar` into `plugins` and start Leaf 26.2.
+4. Confirm the console prints `FurryplaceEvent 1.0.6 está listo.`
 
 Every player receives the persistent FurryPlace menu Nether Star in hotbar slot 8. It remains available in every world and opens the same menu as `/furryplace menu`.
 
@@ -57,4 +57,4 @@ From the project directory:
 mvn -Dmaven.repo.local=.m2-local clean test package
 ```
 
-The JAR is created at `target/FurryplaceEvent-1.0.5.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.
+The JAR is created at `target/FurryplaceEvent-1.0.6.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.

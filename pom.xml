@@ -6,7 +6,7 @@
 
     <groupId>com.furryplace</groupId>
     <artifactId>furryplace-event</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <name>FurryplaceEvent</name>
     <description>One-time Furryplace building event plugin for Leaf 26.2.</description>
 
