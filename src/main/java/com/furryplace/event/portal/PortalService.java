@@ -5,7 +5,6 @@ import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.domain.WorldBlockKey;
 import com.furryplace.event.persistence.StateRepository;
 import com.furryplace.event.service.MessageService;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -128,13 +127,6 @@ public final class PortalService implements Listener {
         long until = handledUntil.getOrDefault(player.getUniqueId(), 0L);
         if (until > now) return;
         handledUntil.put(player.getUniqueId(), now + 10L);
-        if (!validSelection()) {
-            messages.warn(player, "portal.broken");
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                if (online.hasPermission("furryplace.admin")) messages.warn(online, "portal.broken");
-            }
-            return;
-        }
         if (state.stage() == EventStage.INACTIVE) {
             Vector look = player.getLocation().getDirection().setY(0);
             if (look.lengthSquared() < 0.01) look = new Vector(0, 0, 1);
@@ -149,13 +141,18 @@ public final class PortalService implements Listener {
 
     private boolean isOnControlledPortal(Location location) {
         if (location == null || location.getWorld() == null || state.portalBlocks().isEmpty()) return false;
-        String world = location.getWorld().getName();
+        World world = location.getWorld();
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
-        return state.portalBlocks().contains(new WorldBlockKey(world, x, y, z))
-            || state.portalBlocks().contains(new WorldBlockKey(world, x, y + 1, z))
-            || state.portalBlocks().contains(new WorldBlockKey(world, x, y - 1, z));
+        return isSelectedPortalBlock(world, x, y, z)
+            || isSelectedPortalBlock(world, x, y + 1, z)
+            || isSelectedPortalBlock(world, x, y - 1, z);
+    }
+
+    private boolean isSelectedPortalBlock(World world, int x, int y, int z) {
+        return state.portalBlocks().contains(new WorldBlockKey(world.getName(), x, y, z))
+            && world.getBlockAt(x, y, z).getType() == Material.NETHER_PORTAL;
     }
 
     private Set<WorldBlockKey> floodFill(Block start) {
@@ -171,15 +168,6 @@ public final class PortalService implements Listener {
         }
         if (!queue.isEmpty()) return Set.of();
         return result;
-    }
-
-    private boolean validSelection() {
-        if (state.portalBlocks().isEmpty()) return false;
-        for (WorldBlockKey key : state.portalBlocks()) {
-            World world = Bukkit.getWorld(key.world());
-            if (world == null || world.getBlockAt(key.x(), key.y(), key.z()).getType() != Material.NETHER_PORTAL) return false;
-        }
-        return true;
     }
 
     private boolean isWand(ItemStack item) {

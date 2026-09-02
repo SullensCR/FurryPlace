@@ -176,8 +176,7 @@ public final class PlayerLifecycleListener implements Listener {
         }
         membership.put(player.getUniqueId(), newPlot.index());
         if (state.stage() == EventStage.ACTIVE && newPlot.complete()
-            && newPlot.ownerId().equals(player.getUniqueId()) && !player.hasPermission("furryplace.judge")
-            && !player.hasPermission("furryplace.admin") && player.hasPermission("furryplace.player")) playerStates.activateOwner(player);
+            && newPlot.ownerId().equals(player.getUniqueId()) && player.hasPermission("furryplace.player")) playerStates.activateOwner(player);
         else playerStates.activateViewer(player);
         packets.applyPlot(player, newPlot);
     }

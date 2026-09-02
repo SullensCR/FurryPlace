@@ -4,7 +4,6 @@ import com.furryplace.event.domain.EventStage;
 import com.furryplace.event.domain.PlotBounds;
 import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
-import com.furryplace.event.domain.Role;
 import com.furryplace.event.persistence.StateRepository;
 import com.furryplace.event.service.MessageService;
 import org.bukkit.Bukkit;
@@ -116,7 +115,7 @@ public final class PlotService {
     }
 
     public void join(Player player) {
-        if (Role.resolve(player) != Role.PLAYER || !player.hasPermission("furryplace.player")) {
+        if (!player.hasPermission("furryplace.player")) {
             messages.send(player, "errors.no-permission");
             return;
         }
