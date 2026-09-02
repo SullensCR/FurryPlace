@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
@@ -97,6 +98,17 @@ public final class PortalService implements Listener {
         messages.send(player, "portal.selected");
     }
 
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent event) {
+        if (!isSelectedPortalBlock(event.getBlock())) return;
+        if (!isWand(event.getPlayer().getInventory().getItemInMainHand())) {
+            event.setCancelled(true);
+            return;
+        }
+        state.portalBlocks().clear();
+        repository.save(state);
+    }
+
     @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST)
     public void onPortal(PlayerPortalEvent event) {
         if (!isOnControlledPortal(event.getFrom())) return;
@@ -153,6 +165,11 @@ public final class PortalService implements Listener {
     private boolean isSelectedPortalBlock(World world, int x, int y, int z) {
         return state.portalBlocks().contains(new WorldBlockKey(world.getName(), x, y, z))
             && world.getBlockAt(x, y, z).getType() == Material.NETHER_PORTAL;
+    }
+
+    private boolean isSelectedPortalBlock(Block block) {
+        return block.getType() == Material.NETHER_PORTAL
+            && state.portalBlocks().contains(new WorldBlockKey(block.getWorld().getName(), block.getX(), block.getY(), block.getZ()));
     }
 
     private Set<WorldBlockKey> floodFill(Block start) {

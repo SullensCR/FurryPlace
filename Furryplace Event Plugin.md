@@ -303,9 +303,10 @@ Then load that player's persistent event inventory/state and set them to Creativ
 
 - `/furryplace portal-wand` is Admin-only and player-only.
 - It gives a tagged feather named `<white>Set portal</white>`.
-- Clicking a Nether Portal block is accepted only in `lobby`; other worlds are rejected.
+- Right-clicking a Nether Portal block with the wand is accepted only in `lobby`; other worlds are rejected.
 - The plugin detects and persists every connected portal block in that portal opening.
 - Selecting another portal replaces the previous selection.
+- The selected portal cannot be broken normally. Left-click one of its portal blocks with the portal wand to remove it and clear the selection.
 - The controlled portal never performs normal Nether travel.
 - Portal contact is detected while the player is standing on or within the selected portal blocks, including Survival, before normal Nether travel can begin.
 
