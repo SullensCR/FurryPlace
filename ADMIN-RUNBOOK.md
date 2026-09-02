@@ -17,7 +17,7 @@ The plugin does not create missing worlds. If `place` or `place-template` is mis
 
 1. Stand at the desired position in `lobby` and run `/furryplace set-spawn`.
 2. Run `/furryplace portal-wand`, then right-click a Nether Portal block in `lobby`.
-3. Run `/furryplace template generate` and confirm the menu. This creates the default ground and a full-height, hollow andesite boundary wall in `place-template`, captures it, and keeps players in the lobby while progress is shown.
+3. Run `/furryplace template generate` and confirm the menu. This creates the default ground with a two-block-wide andesite outline level with the grass in `place-template`, captures it, and keeps players in the lobby while progress is shown.
 4. If desired, edit the finished `place-template` manually. While standing in `place-template`, open `/furryplace menu` and click **Guardar plantilla** to capture the edits and return to lobby. Starting the event also freezes the current edited template; do not run `template generate` again, because that command intentionally restores the default template first.
 
 Do not stop the server while setup is running unless necessary. If it does stop, the journal restarts the interrupted job safely on the next startup.

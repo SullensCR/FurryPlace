@@ -447,9 +447,8 @@ public final class PlotService {
                 int relativeZ = (int) (column % width) - boundaryWidth;
                 boolean interior = relativeX >= 0 && relativeX < size && relativeZ >= 0 && relativeZ < size;
                 Material material;
-                if (interior && y < surfaceY) material = Material.DIRT;
-                else if (interior && y == surfaceY) material = Material.GRASS_BLOCK;
-                else if (!interior) material = Material.ANDESITE;
+                if (y < surfaceY) material = Material.DIRT;
+                else if (y == surfaceY) material = interior ? Material.GRASS_BLOCK : Material.ANDESITE;
                 else material = Material.AIR;
                 world.getBlockAt(bounds.originX() + relativeX, y, bounds.originZ() + relativeZ)
                     .setType(material, false);

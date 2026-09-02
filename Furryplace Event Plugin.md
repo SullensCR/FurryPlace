@@ -180,7 +180,7 @@ There is one combined Admin action: `Cancelar y reiniciar evento`.
 
 - A two-block-wide logical boundary surrounds the outside of the 80 x 80 interior.
 - Boundary protection applies through the world's full height.
-- Visible andesite forms a two-block-wide hollow boundary wall around the interior through the world's full height. This makes the physical blocks clearly show the plot limits.
+- Visible andesite forms a two-block-wide ground-level outline around the interior, at the same height as the grass. This makes the physical blocks clearly show the plot limits without enclosing the plot in walls.
 - Contestants cannot modify the logical boundary or move blocks, fluids, or entities through it.
 
 ### Safe arrival
@@ -203,7 +203,7 @@ There is one combined Admin action: `Cancelar y reiniciar evento`.
   - Grass at Y=80.
   - Dirt from the world minimum height through Y=79.
 - Default visible outline:
-  - Two-block-wide andesite hollow boundary wall outside the interior through the world's full height.
+  - Two-block-wide andesite outline outside the interior at Y=80, level with the grass.
 - The start action is blocked until template generation has completed.
 
 Admins may edit `place-template` manually after generation.
