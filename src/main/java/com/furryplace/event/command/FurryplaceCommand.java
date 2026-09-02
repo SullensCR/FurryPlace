@@ -101,6 +101,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
                 if (state.winner() != null) plots.view(player, state.winner());
             }
             case "ADMIN_PRIMARY" -> adminPrimary(player);
+            case "SAVE_TEMPLATE" -> saveTemplate(player);
             case "RESET_CONFIRM" -> openConfirmation(player, Confirmation.RESET, null);
             case "EVENT_START_CONFIRM" -> openConfirmation(player, Confirmation.START, null);
             case "EVENT_DURATION" -> duration(player, click);
@@ -158,6 +159,30 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
             case REVIEWING -> menus.open(player, "review");
             case JUDGING -> menus.open(player, "winner-browser");
             case COMPLETE -> plots.view(player, state.winner());
+        }
+    }
+
+    private void saveTemplate(Player player) {
+        if (!player.hasPermission("furryplace.admin")) {
+            messages.send(player, "errors.no-permission");
+            return;
+        }
+        if (plots.templateWorld().filter(world -> world.getName().equals(player.getWorld().getName())).isEmpty()
+            || state.stage() != EventStage.INACTIVE) {
+            messages.send(player, "errors.invalid-stage");
+            return;
+        }
+        player.closeInventory();
+        messages.send(player, "template.saving");
+        if (!plots.freezeTemplate(success -> {
+            if (!success) {
+                messages.send(player, "template.save-failed");
+                return;
+            }
+            messages.send(player, "template.saved");
+            if (player.isOnline()) players.sendLobby(player);
+        })) {
+            messages.send(player, "template.save-busy");
         }
     }
 

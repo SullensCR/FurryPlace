@@ -4,8 +4,8 @@
 
 1. Stop the server and back up `lobby`, `place`, and `place-template`.
 2. Install PacketEvents 2.13.0 in the server's `plugins` folder.
-3. Copy `FurryplaceEvent-1.0.4.jar` into `plugins` and start Leaf 26.2.
-4. Confirm the console prints `FurryplaceEvent 1.0.4 está listo.`
+3. Copy `FurryplaceEvent-1.0.5.jar` into `plugins` and start Leaf 26.2.
+4. Confirm the console prints `FurryplaceEvent 1.0.5 está listo.`
 
 Every player receives the persistent FurryPlace menu Nether Star in hotbar slot 8. It remains available in every world and opens the same menu as `/furryplace menu`.
 
@@ -16,7 +16,7 @@ The plugin does not create missing worlds. If `place` or `place-template` is mis
 1. Stand at the desired position in `lobby` and run `/furryplace set-spawn`.
 2. Run `/furryplace portal-wand`, then right-click a Nether Portal block in `lobby`.
 3. Run `/furryplace template generate` and confirm the menu. This creates the default ground and a full-height, hollow andesite boundary wall in `place-template`, captures it, and keeps players in the lobby while progress is shown.
-4. If desired, edit the finished `place-template` manually. Starting the event automatically freezes the current edited template; do not run `template generate` again, because that command intentionally restores the default template first.
+4. If desired, edit the finished `place-template` manually. While standing in `place-template`, open `/furryplace menu` and click **Guardar plantilla** to capture the edits and return to lobby. Starting the event also freezes the current edited template; do not run `template generate` again, because that command intentionally restores the default template first.
 
 Do not stop the server while setup is running unless necessary. If it does stop, the journal restarts the interrupted job safely on the next startup.
 
@@ -57,4 +57,4 @@ From the project directory:
 mvn -Dmaven.repo.local=.m2-local clean test package
 ```
 
-The JAR is created at `target/FurryplaceEvent-1.0.0.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.
+The JAR is created at `target/FurryplaceEvent-1.0.5.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.

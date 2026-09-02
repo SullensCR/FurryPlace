@@ -208,6 +208,8 @@ There is one combined Admin action: `Cancelar y reiniciar evento`.
 
 Admins may edit `place-template` manually after generation.
 
+While an administrator is in `place-template`, the Admin menu shows a **Guardar plantilla** button. It captures the edited template snapshot and, after a successful save, returns the administrator to the configured lobby spawn. The button is hidden in other worlds and is available only while the event is inactive.
+
 ### Snapshot contents
 
 At event start, freeze a versioned template snapshot containing:

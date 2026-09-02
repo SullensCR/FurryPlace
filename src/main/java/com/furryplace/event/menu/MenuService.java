@@ -55,6 +55,7 @@ public final class MenuService implements Listener {
     private static final Set<String> ACTIONS = Set.of(
         "CLOSE", "BACK_MAIN", "JOIN_OWN", "OPEN_BROWSE", "OPEN_TOOLS", "OPEN_JUDGE",
         "ADMIN_PRIMARY", "RESET_CONFIRM", "EVENT_START_CONFIRM", "EVENT_DURATION", "CONFIRM", "VIEW_WINNER",
+        "SAVE_TEMPLATE",
         "PAGE_PREVIOUS", "PAGE_NEXT", "SEARCH", "GIVE_WEATHER", "GIVE_TIME", "GIVE_BIOME",
         "WEATHER_CLEAR", "WEATHER_RAIN", "WEATHER_THUNDER", "TIME_DAWN", "TIME_DAY", "TIME_NOON",
         "TIME_SUNSET", "TIME_NIGHT", "TIME_MIDNIGHT", "REVIEW_PREVIOUS", "REVIEW_TAKEOVER",
@@ -140,6 +141,7 @@ public final class MenuService implements Listener {
         applyUniversalPattern(inventory);
         for (ConfiguredItem configured : definition.items()) {
             if (menu.equals("start-event") && configured.id().equals("border")) continue;
+            if (configured.action() != null && configured.action().equals("SAVE_TEMPLATE") && !isTemplateWorld(player)) continue;
             ItemStack item = item(configured.material(), configured.name(), configured.lore(), configured.glow(), placeholders);
             for (int slot : configured.slots()) {
                 if (slot < 0 || slot >= inventory.getSize()) continue;
@@ -162,6 +164,11 @@ public final class MenuService implements Listener {
             holder.actions.put(slot, new SlotAction(action, entry.payload(), null));
         }
         player.openInventory(inventory);
+    }
+
+    private boolean isTemplateWorld(Player player) {
+        String templateWorld = plugin.getConfig().getString("worlds.template", "place-template");
+        return player.getWorld() != null && player.getWorld().getName().equals(templateWorld);
     }
 
     @EventHandler

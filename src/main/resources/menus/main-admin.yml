@@ -15,6 +15,15 @@ items:
     slot: 24
     action: RESET_CONFIRM
     item: {material: TNT, name: '<red>Cancelar y reiniciar</red>'}
+  save-template:
+    slot: 31
+    action: SAVE_TEMPLATE
+    item:
+      material: WRITABLE_BOOK
+      name: '<green><b>Guardar plantilla</b></green>'
+      lore:
+        - '<gray>Guarda los cambios de place-template.</gray>'
+        - '<gray>Después vuelve al lobby.</gray>'
   close:
     slot: 49
     action: CLOSE

@@ -50,6 +50,10 @@ spawn:
   set: '<green>El punto de aparición del evento fue guardado.</green>'
 template:
   confirmation: '<red>Esta acción sobrescribirá la plantilla. Confirma desde el menú.</red>'
+  saving: '<yellow>Guardando la plantilla editada...</yellow>'
+  saved: '<green>La plantilla fue guardada. Regresando al lobby.</green>'
+  save-failed: '<red>No se pudo guardar la plantilla.</red>'
+  save-busy: '<red>La plantilla no puede guardarse mientras otra operación está en curso.</red>'
   generating: '<yellow>Generando la plantilla...</yellow> <aqua><percent>%</aqua>'
   generated: '<green>La plantilla fue generada.</green>'
   refreshing: '<yellow>Actualizando la plantilla del evento...</yellow>'
