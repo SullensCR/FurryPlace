@@ -89,6 +89,8 @@ When the timer reaches zero:
 
 The reviewing Admin selects any participant head as the first plot. Remaining plots follow persisted plot-allocation order, wrapping from the final entry back to the first.
 
+From the Admin manage-event menu, the **Iniciar revisión** button replaces **Iniciar evento** after construction finishes. It opens the participant selector so the Admin can choose the first plot for the review cycle.
+
 ### Reviewing
 
 - All online players in every world are teleported to the selected plot in survival view-only mode with flight allowed.

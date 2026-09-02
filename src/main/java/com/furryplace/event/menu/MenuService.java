@@ -2,6 +2,7 @@ package com.furryplace.event.menu;
 
 import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
+import com.furryplace.event.domain.EventStage;
 import com.furryplace.event.config.ConfigurationMigrationService;
 import com.furryplace.event.packet.PacketBridge;
 import com.furryplace.event.service.MessageService;
@@ -54,7 +55,7 @@ public final class MenuService implements Listener {
 
     private static final Set<String> ACTIONS = Set.of(
         "CLOSE", "BACK_MAIN", "JOIN_OWN", "OPEN_BROWSE", "OPEN_TOOLS", "OPEN_JUDGE",
-        "ADMIN_PRIMARY", "RESET_CONFIRM", "EVENT_START_CONFIRM", "EVENT_DURATION", "CONFIRM", "VIEW_WINNER",
+        "ADMIN_PRIMARY", "RESET_CONFIRM", "EVENT_START_CONFIRM", "EVENT_DURATION", "REVIEW_START", "CONFIRM", "VIEW_WINNER",
         "SAVE_TEMPLATE",
         "PAGE_PREVIOUS", "PAGE_NEXT", "SEARCH", "GIVE_WEATHER", "GIVE_TIME", "GIVE_BIOME",
         "WEATHER_CLEAR", "WEATHER_RAIN", "WEATHER_THUNDER", "TIME_DAWN", "TIME_DAY", "TIME_NOON",
@@ -142,6 +143,11 @@ public final class MenuService implements Listener {
         for (ConfiguredItem configured : definition.items()) {
             if (menu.equals("start-event") && configured.id().equals("border")) continue;
             if (configured.action() != null && configured.action().equals("SAVE_TEMPLATE") && !isTemplateWorld(player)) continue;
+            if (menu.equals("start-event") && configured.action() != null) {
+                if (configured.action().equals("EVENT_START_CONFIRM") && state.stage() != EventStage.INACTIVE) continue;
+                if (configured.action().equals("REVIEW_START") && state.stage() != EventStage.REVIEW_PENDING) continue;
+                if (configured.action().equals("EVENT_DURATION") && state.stage() == EventStage.REVIEW_PENDING) continue;
+            }
             ItemStack item = item(configured.material(), configured.name(), configured.lore(), configured.glow(), placeholders);
             for (int slot : configured.slots()) {
                 if (slot < 0 || slot >= inventory.getSize()) continue;

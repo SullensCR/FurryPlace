@@ -12,6 +12,15 @@ items:
       lore:
         - '<gray>Click para empezar el evento.</gray>'
       glow: true
+  review-start:
+    slot: 21
+    action: REVIEW_START
+    item:
+      material: SPYGLASS
+      name: '<bold><gold>Iniciar revisión</gold></bold>'
+      lore:
+        - '<gray>Selecciona la primera parcela que se revisará.</gray>'
+      glow: true
   duration:
     slot: 23
     action: EVENT_DURATION

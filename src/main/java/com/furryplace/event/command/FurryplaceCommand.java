@@ -106,6 +106,13 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
                 if (state.winner() != null) plots.view(player, state.winner());
             }
             case "ADMIN_PRIMARY" -> adminPrimary(player);
+            case "REVIEW_START" -> {
+                if (!player.hasPermission("furryplace.admin") || state.stage() != EventStage.REVIEW_PENDING) {
+                    messages.send(player, "errors.invalid-stage");
+                } else {
+                    menus.open(player, "review-start-browser");
+                }
+            }
             case "SAVE_TEMPLATE" -> saveTemplate(player);
             case "RESET_CONFIRM" -> openConfirmation(player, Confirmation.RESET, null);
             case "EVENT_START_CONFIRM" -> openConfirmation(player, Confirmation.START, null);
@@ -160,7 +167,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
         if (!player.hasPermission("furryplace.admin")) return;
         switch (state.stage()) {
             case INACTIVE, ACTIVE -> menus.open(player, "start-event");
-            case REVIEW_PENDING -> menus.open(player, "review-start-browser");
+            case REVIEW_PENDING -> menus.open(player, "start-event");
             case REVIEWING -> menus.open(player, "review");
             case JUDGING -> menus.open(player, "winner-browser");
             case COMPLETE -> plots.view(player, state.winner());
