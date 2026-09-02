@@ -71,6 +71,15 @@ winner:
   chat: '<gold>¡<player> ganó el evento Furryplace con <votes> votos de la comunidad!</gold>'
   title: '<gold>¡Ganador!</gold>'
   subtitle: '<yellow><player></yellow>'
+test:
+  usage: '<red>Uso: /furryplace test <MODAL|SIMPLE|CUSTOM> <jugador Bedrock>.</red>'
+  invalid-mode: '<red>El modo debe ser MODAL, SIMPLE o CUSTOM.</red>'
+  floodgate-missing: '<red>Floodgate no está instalado o habilitado.</red>'
+  player-not-found: '<red>No se encontró al jugador conectado <player>.</red>'
+  not-bedrock: '<red><player> no es un jugador Bedrock de Floodgate.</red>'
+  sent: '<green>Formulario <mode> enviado a <player>.</green>'
+  send-failed: '<red>No se pudo enviar el formulario a <player>.</red>'
+  response: '<aqua>Respuesta de formulario <mode>: <result></aqua>'
 items:
   menu-name: '<yellow><b>Menu de FurryPlace</b></yellow>'
   menu-lore:

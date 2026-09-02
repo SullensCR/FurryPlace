@@ -460,6 +460,8 @@ When a prohibited creative item enters the owner's event inventory:
 - `/furryplace winner`
   - Shortcut to the appropriate Judge/Admin review, judging, or winner menu.
   - Winner controls are also available through `/furryplace menu`.
+- `/furryplace test <MODAL|SIMPLE|CUSTOM> <player_name>`
+  - Admin-only diagnostic command that sends a native Floodgate form to an online Bedrock player and reports the response.
 
 ### Admin commands
 

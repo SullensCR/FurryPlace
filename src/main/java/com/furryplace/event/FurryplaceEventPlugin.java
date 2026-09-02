@@ -1,6 +1,8 @@
 package com.furryplace.event;
 
 import com.furryplace.event.command.FurryplaceCommand;
+import com.furryplace.event.bedrock.BedrockFormGateway;
+import com.furryplace.event.bedrock.UnavailableBedrockFormGateway;
 import com.furryplace.event.config.ConfigurationMigrationService;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.item.WandService;
@@ -79,7 +81,7 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
         portal.router(lifecycle::routeForStage);
         ProtectionListener protection = new ProtectionListener(this, new AccessPolicy(state, plots), plots, messages, wands);
         FurryplaceCommand command = new FurryplaceCommand(state, repository, coordinator, plots, lifecycle, portal,
-            wands, menus, packets, messages);
+            wands, menus, packets, messages, bedrockForms());
         MenuItemService menuItem = new MenuItemService(this, messages, command::openMain);
         menus.actions(command);
         coordinator.hooks(new EventRuntimeHooks(this, state, plots, lifecycle, playerStates, messages));
@@ -99,6 +101,19 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
         plots.recoverInterruptedOperations();
         coordinator.startTicker();
         getLogger().info("FurryplaceEvent " + getDescription().getVersion() + " está listo.");
+    }
+
+    private BedrockFormGateway bedrockForms() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("floodgate")) {
+            return new UnavailableBedrockFormGateway();
+        }
+        try {
+            return (BedrockFormGateway) Class.forName("com.furryplace.event.bedrock.FloodgateFormGateway")
+                .getConstructor().newInstance();
+        } catch (ReflectiveOperationException exception) {
+            getLogger().warning("No se pudo activar el puente de formularios Bedrock: " + exception.getMessage());
+            return new UnavailableBedrockFormGateway();
+        }
     }
 
     @Override

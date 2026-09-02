@@ -1,5 +1,6 @@
 package com.furryplace.event.command;
 
+import com.furryplace.event.bedrock.BedrockFormGateway;
 import com.furryplace.event.domain.EnvironmentSettings;
 import com.furryplace.event.domain.EventStage;
 import com.furryplace.event.domain.PlotRecord;
@@ -46,11 +47,13 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
     private final MenuService menus;
     private final PacketBridge packets;
     private final MessageService messages;
+    private final BedrockFormGateway bedrockForms;
     private final Map<UUID, Pending> confirmations = new HashMap<>();
 
     public FurryplaceCommand(RuntimeState state, StateRepository repository, EventCoordinator coordinator,
                              PlotService plots, PlayerLifecycleListener players, PortalService portal,
-                             WandService wands, MenuService menus, PacketBridge packets, MessageService messages) {
+                             WandService wands, MenuService menus, PacketBridge packets, MessageService messages,
+                             BedrockFormGateway bedrockForms) {
         this.state = state;
         this.repository = repository;
         this.coordinator = coordinator;
@@ -61,6 +64,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
         this.menus = menus;
         this.packets = packets;
         this.messages = messages;
+        this.bedrockForms = bedrockForms;
     }
 
     @Override
@@ -80,6 +84,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
             case "view" -> view(sender, args);
             case "tool" -> tool(sender, args);
             case "winner" -> winnerMenu(sender);
+            case "test" -> testForm(sender, args);
             case "set-spawn" -> setSpawn(sender);
             case "portal-wand" -> adminPlayer(sender, portal::giveWand);
             case "template" -> template(sender, args);
@@ -357,6 +362,45 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
         });
     }
 
+    private void testForm(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("furryplace.admin")) {
+            messages.send(sender, "errors.no-permission");
+            return;
+        }
+        if (args.length != 3) {
+            messages.send(sender, "test.usage");
+            return;
+        }
+        BedrockFormGateway.Mode mode;
+        try {
+            mode = BedrockFormGateway.Mode.valueOf(args[1].toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            messages.send(sender, "test.invalid-mode");
+            return;
+        }
+        if (!bedrockForms.available()) {
+            messages.send(sender, "test.floodgate-missing");
+            return;
+        }
+        Player target = Bukkit.getPlayerExact(args[2]);
+        if (target == null) {
+            messages.send(sender, "test.player-not-found", Map.of("player", args[2]));
+            return;
+        }
+        if (!bedrockForms.isBedrock(target)) {
+            messages.send(sender, "test.not-bedrock", Map.of("player", target.getName()));
+            return;
+        }
+        String modeLabel = mode.name().toLowerCase(Locale.ROOT);
+        boolean sent = bedrockForms.sendTest(target, mode, result ->
+            messages.send(target, "test.response", Map.of("mode", modeLabel, "result", result)));
+        if (!sent) {
+            messages.send(sender, "test.send-failed", Map.of("player", target.getName()));
+            return;
+        }
+        messages.send(sender, "test.sent", Map.of("mode", modeLabel, "player", target.getName()));
+    }
+
     private void setSpawn(CommandSender sender) {
         adminPlayer(sender, player -> {
             if (!players.isLobby(player.getWorld())) { messages.send(player, "errors.admin-not-lobby"); return; }
@@ -399,12 +443,14 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> values = new ArrayList<>();
         if (args.length == 1) {
-            values.addAll(List.of("join", "menu", "browse", "view", "tool", "winner"));
+            values.addAll(List.of("join", "menu", "browse", "view", "tool", "winner", "test"));
             if (sender.hasPermission("furryplace.admin")) values.addAll(List.of("set-spawn", "portal-wand", "template", "reset"));
         } else if (args.length == 2 && args[0].equalsIgnoreCase("tool")) values.addAll(List.of("weather", "time", "biome"));
+        else if (args.length == 2 && args[0].equalsIgnoreCase("test")) values.addAll(List.of("modal", "simple", "custom"));
         else if (args.length == 2 && args[0].equalsIgnoreCase("template")) values.addAll(List.of("generate", "refresh"));
         else if (args.length == 2 && args[0].equalsIgnoreCase("view")) values.addAll(state.completedPlotsInAllocationOrder().stream().map(PlotRecord::ownerName).toList());
         else if (args.length == 3 && args[0].equalsIgnoreCase("tool") && sender.hasPermission("furryplace.admin")) values.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+        else if (args.length == 3 && args[0].equalsIgnoreCase("test") && sender.hasPermission("furryplace.admin")) values.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
         String prefix = args[args.length - 1].toLowerCase(Locale.ROOT);
         return values.stream().filter(value -> value.toLowerCase(Locale.ROOT).startsWith(prefix)).sorted().toList();
     }

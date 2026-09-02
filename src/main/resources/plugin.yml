@@ -7,13 +7,14 @@ depend:
   - packetevents
 softdepend:
   - Multiverse-Core
+  - floodgate
 authors:
   - Furryplace
 description: One-time Furryplace building event.
 commands:
   furryplace:
     description: Controla y participa en el evento Furryplace.
-    usage: /furryplace <join|menu|browse|view|tool|winner|set-spawn|portal-wand|template|reset>
+    usage: /furryplace <join|menu|browse|view|tool|winner|test|set-spawn|portal-wand|template|reset>
 permissions:
   furryplace.player:
     description: Permite participar en el evento.
