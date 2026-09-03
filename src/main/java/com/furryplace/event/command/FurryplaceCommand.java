@@ -117,6 +117,7 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
             case "RESET_CONFIRM" -> openConfirmation(player, Confirmation.RESET, null);
             case "EVENT_START_CONFIRM" -> openConfirmation(player, Confirmation.START, null);
             case "EVENT_DURATION" -> duration(player, click);
+            case "EVENT_DURATION_CUSTOM" -> durationCustom(player, payload);
             case "CONFIRM" -> executeConfirmation(player);
             case "GIVE_WEATHER" -> ownCurrentPlot(player).ifPresent(plot -> wands.restore(player, WandService.Type.WEATHER));
             case "GIVE_TIME" -> ownCurrentPlot(player).ifPresent(plot -> wands.restore(player, WandService.Type.TIME));
@@ -218,6 +219,20 @@ public final class FurryplaceCommand implements CommandExecutor, TabCompleter, M
         }
         int delta = (click == MenuService.Click.RIGHT || click == MenuService.Click.SHIFT_RIGHT) ? -5 : 5;
         coordinator.configureDuration(state.configuredMinutes() + delta, state.stage() == EventStage.ACTIVE);
+        menus.open(player, "start-event");
+    }
+
+    private void durationCustom(Player player, String value) {
+        if (!player.hasPermission("furryplace.admin")) return;
+        if (value.isBlank()) {
+            menus.open(player, "start-event");
+            return;
+        }
+        try {
+            coordinator.configureDuration(Integer.parseInt(value), state.stage() == EventStage.ACTIVE);
+        } catch (NumberFormatException exception) {
+            messages.send(player, "errors.invalid-stage");
+        }
         menus.open(player, "start-event");
     }
 

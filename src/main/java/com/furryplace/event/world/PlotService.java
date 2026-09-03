@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,6 +54,7 @@ public final class PlotService {
     private volatile TemplateSnapshot currentSnapshot;
     private boolean refreshing;
     private EntryHandler entryHandler;
+    private final Set<UUID> generationParticipants = new HashSet<>();
 
     public PlotService(JavaPlugin plugin, RuntimeState state, StateRepository repository,
                        MessageService messages, BlockOperationQueue operations) {
@@ -151,11 +153,13 @@ public final class PlotService {
         plot.status(PlotRecord.Status.GENERATING);
         plot.snapshotVersion(currentSnapshot.version());
         repository.save(state);
+        generationParticipants.add(plot.ownerId());
         operations.enqueue(new ApplySnapshotOperation(plot, currentSnapshot, () -> {
             plot.status(PlotRecord.Status.COMPLETE);
             repository.save(state);
             Player online = Bukkit.getPlayer(plot.ownerId());
-            if (online != null && state.stage() == EventStage.ACTIVE) {
+            boolean mayEnter = generationParticipants.remove(plot.ownerId());
+            if (mayEnter && online != null && state.stage() == EventStage.ACTIVE) {
                 messages.clearActionBar(online);
                 messages.send(online, "plot.generation-complete");
                 enter(online, plot, true);
@@ -172,6 +176,11 @@ public final class PlotService {
         }
         enter(player, plot, false);
         return true;
+    }
+
+    /** Prevents a completed generation from teleporting a player who disconnected mid-generation. */
+    public void playerDisconnected(UUID owner) {
+        generationParticipants.remove(owner);
     }
 
     public void enter(Player player, PlotRecord plot, boolean ownerRequest) {
@@ -223,6 +232,7 @@ public final class PlotService {
 
     public void cancelIncompleteAtTimeout() {
         refreshing = false;
+        generationParticipants.clear();
         operations.cancelAll();
         for (PlotRecord plot : new ArrayList<>(state.plots())) {
             if (plot.complete()) continue;
@@ -256,6 +266,7 @@ public final class PlotService {
     }
 
     public void reset(Runnable completion) {
+        generationParticipants.clear();
         operations.cancelAll();
         List<PlotRecord> plots = new ArrayList<>(state.plots());
         if (plots.isEmpty()) {

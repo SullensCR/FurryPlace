@@ -41,13 +41,22 @@ public final class MessageService {
     }
 
     public Component component(String path, Map<String, ?> replacements) {
+        return component(path, replacements, TagResolver.empty());
+    }
+
+    public Component component(String path, Map<String, ?> replacements, TagResolver additional) {
         String raw = messages.getString(path, "<red>Mensaje faltante: " + path + "</red>");
-        return parse(raw, replacements);
+        return parse(raw, replacements, additional);
     }
 
     public Component parse(String raw, Map<String, ?> replacements) {
+        return parse(raw, replacements, TagResolver.empty());
+    }
+
+    public Component parse(String raw, Map<String, ?> replacements, TagResolver additional) {
         TagResolver.Builder builder = TagResolver.builder();
         replacements.forEach((key, value) -> builder.resolver(Placeholder.unparsed(key, String.valueOf(value))));
+        builder.resolver(additional);
         return miniMessage.deserialize(raw, builder.build());
     }
 
@@ -99,6 +108,10 @@ public final class MessageService {
 
     public void actionBar(Player player, String path, Map<String, ?> replacements) {
         player.sendActionBar(component(path, replacements));
+    }
+
+    public void actionBar(Player player, String path, Map<String, ?> replacements, TagResolver additional) {
+        player.sendActionBar(component(path, replacements, additional));
     }
 
     public void clearActionBar(Player player) {

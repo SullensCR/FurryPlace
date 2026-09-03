@@ -1,5 +1,7 @@
 package com.furryplace.event.menu;
 
+import com.furryplace.event.bedrock.BedrockFormGateway;
+import com.furryplace.event.bedrock.UnavailableBedrockFormGateway;
 import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.domain.EventStage;
@@ -87,24 +89,31 @@ public final class MenuService implements Listener {
     private record Definition(String name, int size, List<Integer> dynamicSlots, List<ConfiguredItem> items) {}
     private record ConfiguredItem(String id, List<Integer> slots, String action, Material material, String name,
                                   List<String> lore, boolean glow, String sound) {}
-    private record DynamicEntry(String payload, String search, ItemStack item) {}
+    private record DynamicEntry(String payload, String search, ItemStack item, String formText) {}
 
     private final JavaPlugin plugin;
     private final RuntimeState state;
     private final PacketBridge packets;
     private final MessageService messages;
+    private final BedrockFormGateway bedrockForms;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final Map<String, Definition> definitions = new HashMap<>();
     private final Map<String, String> biomeNames = new HashMap<>();
     private Actions actions;
 
-    public MenuService(JavaPlugin plugin, RuntimeState state, PacketBridge packets, MessageService messages) {
+    public MenuService(JavaPlugin plugin, RuntimeState state, PacketBridge packets, MessageService messages,
+                       BedrockFormGateway bedrockForms) {
         this.plugin = plugin;
         this.state = state;
         this.packets = packets;
         this.messages = messages;
+        this.bedrockForms = bedrockForms;
         loadBiomeNames();
         reload();
+    }
+
+    public MenuService(JavaPlugin plugin, RuntimeState state, PacketBridge packets, MessageService messages) {
+        this(plugin, state, packets, messages, new UnavailableBedrockFormGateway());
     }
 
     public void actions(Actions value) {
@@ -136,18 +145,15 @@ public final class MenuService implements Listener {
             Placeholder.unparsed("winner", winner == null ? "-" : winner.ownerName()),
             Placeholder.unparsed("votes", winner == null ? "0" : Integer.toString(state.communityVotes().countFor(winner.ownerId())))
         );
+        if (bedrockForms.isBedrock(player)
+            && openBedrock(player, menu, boundedPage, query, returnMenu, definition, dynamic, placeholders)) {
+            return;
+        }
         Holder holder = new Holder(menu, boundedPage, query, returnMenu);
         Inventory inventory = Bukkit.createInventory(holder, definition.size(), miniMessage.deserialize(definition.name(), placeholders));
         holder.inventory = inventory;
         applyUniversalPattern(inventory);
-        for (ConfiguredItem configured : definition.items()) {
-            if (menu.equals("start-event") && configured.id().equals("border")) continue;
-            if (configured.action() != null && configured.action().equals("SAVE_TEMPLATE") && !isTemplateWorld(player)) continue;
-            if (menu.equals("start-event") && configured.action() != null) {
-                if (configured.action().equals("EVENT_START_CONFIRM") && state.stage() != EventStage.INACTIVE) continue;
-                if (configured.action().equals("REVIEW_START") && state.stage() != EventStage.REVIEW_PENDING) continue;
-                if (configured.action().equals("EVENT_DURATION") && state.stage() == EventStage.REVIEW_PENDING) continue;
-            }
+        for (ConfiguredItem configured : visibleItems(menu, player, definition)) {
             ItemStack item = item(configured.material(), configured.name(), configured.lore(), configured.glow(), placeholders);
             for (int slot : configured.slots()) {
                 if (slot < 0 || slot >= inventory.getSize()) continue;
@@ -170,6 +176,128 @@ public final class MenuService implements Listener {
             holder.actions.put(slot, new SlotAction(action, entry.payload(), null));
         }
         player.openInventory(inventory);
+    }
+
+    private boolean openBedrock(Player player, String menu, int page, String query, String returnMenu, Definition definition,
+                                List<DynamicEntry> dynamic, TagResolver placeholders) {
+        List<ConfiguredItem> configured = visibleItems(menu, player, definition);
+        if (menu.equals("confirm")) return openBedrockConfirmation(player, menu, page, query, returnMenu, definition,
+            configured, placeholders);
+
+        List<BedrockFormGateway.Button> controls = new ArrayList<>();
+        List<String> content = new ArrayList<>();
+        for (ConfiguredItem item : configured) {
+            String text = bedrockText(item, placeholders);
+            if (item.action() == null) content.add(text);
+            else controls.add(new BedrockFormGateway.Button(text,
+                () -> activateBedrock(player, menu, page, query, returnMenu, new SlotAction(item.action(), "", item.sound()))));
+        }
+        List<BedrockFormGateway.Button> buttons = new ArrayList<>();
+        List<DynamicEntry> pageEntries = BedrockMenuProjection.pageEntries(dynamic, page, definition.dynamicSlots().size());
+        for (DynamicEntry entry : pageEntries) {
+            String action = dynamicAction(menu);
+            buttons.add(new BedrockFormGateway.Button(entry.formText(),
+                () -> activateBedrock(player, menu, page, query, returnMenu, new SlotAction(action, entry.payload(), null))));
+        }
+        buttons.addAll(controls);
+        String formContent = content.isEmpty() ? "" : String.join("\n\n", content);
+        return bedrockForms.sendSimple(player, plain(definition.name(), placeholders), formContent, buttons, () -> { });
+    }
+
+    private boolean openBedrockConfirmation(Player player, String menu, int page, String query, String returnMenu,
+                                            Definition definition, List<ConfiguredItem> configured,
+                                            TagResolver placeholders) {
+        ConfiguredItem confirm = configured.stream().filter(item -> "CONFIRM".equals(item.action())).findFirst().orElse(null);
+        ConfiguredItem cancel = configured.stream().filter(item -> "CLOSE".equals(item.action())).findFirst().orElse(null);
+        if (confirm == null || cancel == null) return false;
+        return bedrockForms.sendModal(player, plain(definition.name(), placeholders), "¿Deseas continuar?",
+            bedrockText(confirm, placeholders),
+            () -> activateBedrock(player, menu, page, query, returnMenu, new SlotAction(confirm.action(), "", confirm.sound())),
+            bedrockText(cancel, placeholders),
+            () -> activateBedrock(player, menu, page, query, returnMenu, new SlotAction(cancel.action(), "", cancel.sound())),
+            () -> { });
+    }
+
+    private void activateBedrock(Player player, String menu, int page, String query, String returnMenu, SlotAction selected) {
+        if (!player.isOnline()) return;
+        if (selected.sound() != null && !selected.sound().isBlank()) {
+            player.playSound(player.getLocation(), selected.sound(), 1.0f, 1.0f);
+        }
+        switch (selected.action()) {
+            case "CLOSE" -> player.closeInventory();
+            case "PAGE_PREVIOUS" -> open(player, menu, page - 1, query, returnMenu);
+            case "PAGE_NEXT" -> open(player, menu, page + 1, query, returnMenu);
+            case "SEARCH" -> openBedrockSearch(player, menu, returnMenu);
+            case "EVENT_DURATION" -> openBedrockDuration(player, menu, returnMenu);
+            case "DYNAMIC_PLAYER", "DYNAMIC_JUDGE" -> openBedrockParticipantActions(player, menu, page, query, returnMenu, selected);
+            default -> perform(player, selected, Click.LEFT);
+        }
+    }
+
+    private void openBedrockSearch(Player player, String menu, String returnMenu) {
+        boolean sent = bedrockForms.sendInput(player, "Buscar", "Escribe el texto que deseas buscar.", "Buscar", "Texto", "",
+            query -> open(player, menu, 0, query.trim(), returnMenu), () -> open(player, menu, 0, "", returnMenu));
+        if (!sent) open(player, menu, 0, "", returnMenu);
+    }
+
+    private void openBedrockDuration(Player player, String menu, String returnMenu) {
+        boolean active = state.stage() == EventStage.ACTIVE;
+        int minimum = plugin.getConfig().getInt(active ? "timer.minimum-active-minutes" : "timer.minimum-start-minutes", active ? 1 : 5);
+        int maximum = plugin.getConfig().getInt("timer.maximum-minutes", 180);
+        boolean sent = bedrockForms.sendInput(player, "Duración del evento", "Elige un tiempo entre " + minimum + " y " + maximum + " minutos.",
+            "Minutos", minimum + " - " + maximum, Integer.toString(state.configuredMinutes()),
+            value -> perform(player, new SlotAction("EVENT_DURATION_CUSTOM", value.trim(), null), Click.LEFT),
+            () -> open(player, menu, 0, "", returnMenu));
+        if (!sent) open(player, menu, 0, "", returnMenu);
+    }
+
+    private void openBedrockParticipantActions(Player player, String menu, int page, String query, String returnMenu,
+                                               SlotAction selected) {
+        String title = "Parcela";
+        try {
+            UUID owner = UUID.fromString(selected.payload());
+            title = state.plot(owner).map(PlotRecord::ownerName).map(name -> "Parcela de " + name).orElse(title);
+        } catch (IllegalArgumentException ignored) { }
+        boolean sent = bedrockForms.sendModal(player, title, "Elige qué deseas hacer con esta parcela.",
+            "Visitar", () -> perform(player, selected, Click.LEFT),
+            "Votar o quitar voto", () -> perform(player, selected, Click.RIGHT), () -> { });
+        if (!sent) open(player, menu, page, query, returnMenu);
+    }
+
+    private void perform(Player player, SlotAction selected, Click click) {
+        if (actions != null) actions.perform(player, selected.action(), selected.payload(), click);
+    }
+
+    private List<ConfiguredItem> visibleItems(String menu, Player player, Definition definition) {
+        return definition.items().stream().filter(configured -> {
+            if (menu.equals("start-event") && configured.id().equals("border")) return false;
+            if ("SAVE_TEMPLATE".equals(configured.action()) && !isTemplateWorld(player)) return false;
+            if (!menu.equals("start-event") || configured.action() == null) return true;
+            if (configured.action().equals("EVENT_START_CONFIRM")) return state.stage() == EventStage.INACTIVE;
+            if (configured.action().equals("REVIEW_START")) return state.stage() == EventStage.REVIEW_PENDING;
+            return !configured.action().equals("EVENT_DURATION") || state.stage() != EventStage.REVIEW_PENDING;
+        }).toList();
+    }
+
+    private String dynamicAction(String menu) {
+        return switch (menu) {
+            case "biome" -> "DYNAMIC_BIOME";
+            case "judge-browser" -> "DYNAMIC_JUDGE";
+            case "review-start-browser" -> "DYNAMIC_REVIEW_START";
+            case "winner-browser" -> "DYNAMIC_WINNER";
+            default -> "DYNAMIC_PLAYER";
+        };
+    }
+
+    private String bedrockText(ConfiguredItem item, TagResolver placeholders) {
+        String name = plain(item.name(), placeholders);
+        if ("EVENT_DURATION".equals(item.action())) return name + "\nToca para cambiar la duración.";
+        List<String> lore = item.lore().stream().map(line -> plain(line, placeholders)).toList();
+        return BedrockMenuProjection.buttonText(name, lore);
+    }
+
+    private String plain(String text, TagResolver placeholders) {
+        return BedrockMenuProjection.plain(miniMessage.deserialize(text.replace("\r", ""), placeholders));
     }
 
     private boolean isTemplateWorld(Player player) {
@@ -222,7 +350,9 @@ public final class MenuService implements Listener {
                     Placeholder.unparsed("key", key.asString()));
                 ItemStack item = item(Material.GRASS_BLOCK, messages.raw("menu-items.biome-name", "<green><biome></green>"),
                     List.of(messages.raw("menu-items.biome-key", "<gray><key></gray>")), false, resolver);
-                result.add(new DynamicEntry(key.asString(), (label + " " + key.asString()).toLowerCase(Locale.ROOT), item));
+                String formText = plain(messages.raw("menu-items.biome-name", "<green><biome></green>"), resolver)
+                    + "\n" + plain(messages.raw("menu-items.biome-key", "<gray><key></gray>"), resolver);
+                result.add(new DynamicEntry(key.asString(), (label + " " + key.asString()).toLowerCase(Locale.ROOT), item, formText));
             }
             result.sort(Comparator.comparing(DynamicEntry::search));
             return result;
@@ -237,6 +367,7 @@ public final class MenuService implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(messages.raw("menu-items.participant-plot", "<gray>Parcela <plot></gray>"));
         lore.add(messages.raw("menu-items.participant-votes", "<aqua>Votos: <votes></aqua>"));
+        List<String> formLore = new ArrayList<>(lore);
         if (menu.equals("browser")) {
             lore.add(messages.raw("menu-items.participant-visit", "<gray>Click izquierdo: visitar</gray>"));
             lore.add(messages.raw("menu-items.participant-vote", "<gray>Click derecho: votar o quitar voto</gray>"));
@@ -247,7 +378,11 @@ public final class MenuService implements Listener {
         if (judgeCounts) {
             List<String> names = state.judgeVotes().votersFor(plot.ownerId()).stream()
                 .map(Bukkit::getOfflinePlayer).map(player -> player.getName() == null ? "?" : player.getName()).toList();
-            if (!names.isEmpty()) lore.add(messages.raw("menu-items.participant-judges", "<yellow>Jueces: <judges></yellow>"));
+            if (!names.isEmpty()) {
+                String judges = messages.raw("menu-items.participant-judges", "<yellow>Jueces: <judges></yellow>");
+                lore.add(judges);
+                formLore.add(judges);
+            }
         }
         int judgeMaximum = state.completedPlotsInAllocationOrder().stream()
             .mapToInt(candidate -> state.judgeVotes().countFor(candidate.ownerId())).max().orElse(0);
@@ -265,7 +400,11 @@ public final class MenuService implements Listener {
             skull.setOwningPlayer(Bukkit.getOfflinePlayer(plot.ownerId()));
             head.setItemMeta(skull);
         }
-        return new DynamicEntry(plot.ownerId().toString(), (plot.ownerName() + " " + plot.ownerId()).toLowerCase(Locale.ROOT), head);
+        String formText = plain(messages.raw("menu-items.participant-name", "<yellow><player></yellow>"), participant)
+            + "\n" + formLore.stream().map(line -> plain(line, participant)).filter(line -> !line.isBlank())
+                .collect(java.util.stream.Collectors.joining("\n"));
+        return new DynamicEntry(plot.ownerId().toString(), (plot.ownerName() + " " + plot.ownerId()).toLowerCase(Locale.ROOT),
+            head, formText);
     }
 
     private Definition load(String name) {

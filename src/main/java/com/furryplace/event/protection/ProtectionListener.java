@@ -7,6 +7,7 @@ import com.furryplace.event.service.MessageService;
 import com.furryplace.event.world.PlotService;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -123,37 +124,50 @@ public final class ProtectionListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onFluid(BlockFromToEvent event) {
-        if (policy.inPlace(event.getBlock().getLocation()) && !policy.sameActiveInterior(event.getBlock().getLocation(), event.getToBlock().getLocation())) event.setCancelled(true);
+        if ((policy.inPlace(event.getBlock().getLocation()) || policy.inPlace(event.getToBlock().getLocation()))
+            && !policy.sameEditableInterior(event.getBlock().getLocation(), event.getToBlock().getLocation())) event.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPistonExtend(BlockPistonExtendEvent event) {
-        if (!policy.inPlace(event.getBlock().getLocation())) return;
-        for (Block block : event.getBlocks()) if (!policy.sameActiveInterior(block.getLocation(), block.getRelative(event.getDirection()).getLocation())) {
+        if (!policy.inPlace(event.getBlock().getLocation()) && event.getBlocks().stream().noneMatch(block -> policy.inPlace(block.getLocation()))) return;
+        for (Block block : event.getBlocks()) if ((policy.inPlace(block.getLocation()) || policy.inPlace(block.getRelative(event.getDirection()).getLocation()))
+            && !policy.sameEditableInterior(block.getLocation(), block.getRelative(event.getDirection()).getLocation())) {
             event.setCancelled(true); return;
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPistonRetract(BlockPistonRetractEvent event) {
-        if (!policy.inPlace(event.getBlock().getLocation())) return;
-        for (Block block : event.getBlocks()) if (!policy.sameActiveInterior(block.getLocation(), block.getRelative(event.getDirection()).getLocation())) {
+        if (!policy.inPlace(event.getBlock().getLocation()) && event.getBlocks().stream().noneMatch(block -> policy.inPlace(block.getLocation()))) return;
+        for (Block block : event.getBlocks()) if ((policy.inPlace(block.getLocation()) || policy.inPlace(block.getRelative(event.getDirection()).getLocation()))
+            && !policy.sameEditableInterior(block.getLocation(), block.getRelative(event.getDirection()).getLocation())) {
             event.setCancelled(true); return;
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onDispense(BlockDispenseEvent event) {
-        if (policy.inPlace(event.getBlock().getLocation()) && !policy.sameActiveInterior(event.getBlock().getLocation(),
-            event.getBlock().getRelative(((org.bukkit.block.Dispenser) event.getBlock().getState()).getBlockData() instanceof org.bukkit.block.data.Directional directional
-                ? directional.getFacing() : org.bukkit.block.BlockFace.UP).getLocation())) event.setCancelled(true);
+        org.bukkit.block.BlockFace face = ((org.bukkit.block.Dispenser) event.getBlock().getState()).getBlockData() instanceof org.bukkit.block.data.Directional directional
+            ? directional.getFacing() : org.bukkit.block.BlockFace.UP;
+        Location target = event.getBlock().getRelative(face).getLocation();
+        if ((policy.inPlace(event.getBlock().getLocation()) || policy.inPlace(target))
+            && !policy.sameEditableInterior(event.getBlock().getLocation(), target)) event.setCancelled(true);
     }
 
-    @EventHandler public void onBlockExplosion(BlockExplodeEvent event) { if (policy.inPlace(event.getBlock().getLocation())) event.setCancelled(true); }
-    @EventHandler public void onEntityExplosion(EntityExplodeEvent event) { if (policy.inPlace(event.getLocation())) event.setCancelled(true); }
-    @EventHandler public void onIgnite(BlockIgniteEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && event.getCause() == BlockIgniteEvent.IgniteCause.EXPLOSION) event.setCancelled(true); }
-    @EventHandler public void onBurn(BlockBurnEvent event) { if (policy.inPlace(event.getBlock().getLocation())) event.setCancelled(true); }
-    @EventHandler public void onSpread(BlockSpreadEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && event.getNewState().getType() == Material.FIRE) event.setCancelled(true); }
+    @EventHandler public void onBlockExplosion(BlockExplodeEvent event) {
+        if (!policy.inPlace(event.getBlock().getLocation()) && event.blockList().stream().noneMatch(block -> policy.inPlace(block.getLocation()))) return;
+        if (!policy.allowsIndirect(event.getBlock().getLocation()) || event.blockList().stream()
+            .anyMatch(block -> policy.inPlace(block.getLocation()) && !policy.sameEditableInterior(event.getBlock().getLocation(), block.getLocation()))) event.setCancelled(true);
+    }
+    @EventHandler public void onEntityExplosion(EntityExplodeEvent event) {
+        if (!policy.inPlace(event.getLocation()) && event.blockList().stream().noneMatch(block -> policy.inPlace(block.getLocation()))) return;
+        if (!policy.allowsIndirect(event.getLocation()) || event.blockList().stream()
+            .anyMatch(block -> policy.inPlace(block.getLocation()) && !policy.sameEditableInterior(event.getLocation(), block.getLocation()))) event.setCancelled(true);
+    }
+    @EventHandler public void onIgnite(BlockIgniteEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && event.getCause() == BlockIgniteEvent.IgniteCause.EXPLOSION && !policy.allowsIndirect(event.getBlock().getLocation())) event.setCancelled(true); }
+    @EventHandler public void onBurn(BlockBurnEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && !policy.allowsIndirect(event.getBlock().getLocation())) event.setCancelled(true); }
+    @EventHandler public void onSpread(BlockSpreadEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && !policy.allowsIndirect(event.getBlock().getLocation())) event.setCancelled(true); }
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryOpen(InventoryOpenEvent event) {
@@ -214,13 +228,17 @@ public final class ProtectionListener implements Listener {
             || event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION
             || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) event.setCancelled(true);
     }
-    @EventHandler public void onCombust(EntityCombustEvent event) { if (policy.inPlace(event.getEntity().getLocation())) event.setCancelled(true); }
-    @EventHandler public void onChangeBlock(EntityChangeBlockEvent event) { if (policy.inPlace(event.getBlock().getLocation())) event.setCancelled(true); }
+    @EventHandler public void onCombust(EntityCombustEvent event) { if (policy.inPlace(event.getEntity().getLocation()) && !policy.allowsIndirect(event.getEntity().getLocation())) event.setCancelled(true); }
+    @EventHandler public void onChangeBlock(EntityChangeBlockEvent event) { if (policy.inPlace(event.getBlock().getLocation()) && !policy.allowsIndirect(event.getBlock().getLocation())) event.setCancelled(true); }
     @EventHandler public void onProjectile(ProjectileLaunchEvent event) { if (policy.inPlace(event.getEntity().getLocation()) && (!(event.getEntity().getShooter() instanceof Player player) || !policy.mayModify(player, event.getEntity().getLocation()))) event.setCancelled(true); }
 
     @EventHandler(ignoreCancelled = true)
     public void onCreature(CreatureSpawnEvent event) {
         if (!policy.inPlace(event.getLocation())) return;
+        if (policy.reviewing() && !policy.allowsIndirect(event.getLocation())) {
+            event.setCancelled(true);
+            return;
+        }
         if (event.getEntity() instanceof Monster || !ownerSpawnReason(event.getSpawnReason())
             || event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BUILD_SNOWMAN
             || event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BUILD_IRONGOLEM
@@ -258,7 +276,7 @@ public final class ProtectionListener implements Listener {
     private void scanOwnersAndEntities() {
         plots.plotWorld().ifPresent(world -> {
             for (Player player : world.getPlayers()) {
-                if (!policy.mayModify(player, player.getLocation()) || policy.admin(player)) continue;
+                if (!policy.mayModify(player, player.getLocation()) || (policy.admin(player) && !policy.reviewing())) continue;
                 ItemStack[] contents = player.getInventory().getStorageContents();
                 for (int slot = 0; slot < contents.length; slot++) {
                     if (prohibited(contents[slot])) replaceSlot(player, slot);
@@ -290,6 +308,10 @@ public final class ProtectionListener implements Listener {
 
     private void validateSpawn(Entity entity, org.bukkit.event.Cancellable event) {
         if (!policy.inPlace(entity.getLocation())) return;
+        if (policy.reviewing() && !policy.allowsIndirect(entity.getLocation())) {
+            event.setCancelled(true);
+            return;
+        }
         PlotRecord plot = plots.plotAt(entity.getLocation()).orElse(null);
         if (plot == null || !plots.isInterior(plot, entity.getLocation()) || countEntities(plot, entity) >= entityLimit
             || entity instanceof EnderCrystal || entity.getType() == EntityType.TNT) {

@@ -63,7 +63,22 @@ vote:
   selected: '<green>Votaste por la parcela de <player>.</green>'
   removed: '<yellow>Eliminaste tu voto.</yellow>'
 review:
-  actionbar: '<yellow>Parcela de <player></yellow> <aqua>(<current>/<total>)</aqua>'
+  actionbar: '<yellow>Parcela de <player></yellow> <aqua>(<current>/<total>)</aqua> <gray>| Velocidad: <speed-slow> / <speed-normal> / <speed-fast></gray>'
+  speed-slow: 'Lenta'
+  speed-normal: 'Normal'
+  speed-fast: 'Rápida'
+  speed-name: '<yellow>Velocidad</yellow>'
+  speed-lore:
+    - ''
+    - '<dark_gray>Click para cambiar la velocidad de vuelo.</dark_gray>'
+  modify-disabled-name: '<red>Modificar parcela</red>'
+  modify-disabled-lore:
+    - ''
+    - '<dark_gray>Click para permitir cambios en la parcela.</dark_gray>'
+  modify-enabled-name: '<green>Modificar parcela</green>'
+  modify-enabled-lore:
+    - ''
+    - '<dark_gray>Click para bloquear cambios en la parcela.</dark_gray>'
   paused: '<yellow>La revisión está pausada hasta que un administrador tome el control.</yellow>'
   takeover: '<green>Ahora controlas la revisión.</green>'
   incomplete: '<red>Debes visitar todas las parcelas antes de terminar la revisión.</red>'

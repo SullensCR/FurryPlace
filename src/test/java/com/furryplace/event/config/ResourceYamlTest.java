@@ -21,7 +21,7 @@ class ResourceYamlTest {
     void everyBundledMenuIsReadableAndHasValidInventoryGeometry() {
         for (String menu : MENUS) {
             YamlConfiguration yaml = load("menus/" + menu + ".yml");
-            assertEquals("1.0.8", yaml.getString("config-version"), menu);
+            assertEquals("1.0.9", yaml.getString("config-version"), menu);
             assertNotNull(yaml.getString("name"), menu);
             int size = yaml.getInt("size");
             assertTrue(size >= 9 && size <= 54 && size % 9 == 0, menu);
@@ -31,17 +31,22 @@ class ResourceYamlTest {
 
     @Test
     void primaryResourcesAreReadable() {
-        assertEquals("1.0.8", load("config.yml").getString("config-version"));
+        assertEquals("1.0.9", load("config.yml").getString("config-version"));
         assertEquals("lobby", load("config.yml").getString("worlds.lobby"));
-        assertEquals("1.0.8", load("messages.yml").getString("config-version"));
+        assertEquals("1.0.9", load("messages.yml").getString("config-version"));
         assertEquals("<yellow><b>Menu de FurryPlace</b></yellow>", load("messages.yml").getString("items.menu-name"));
         assertEquals(java.util.List.of("", "<dark_gray>Click para abrir el menu del evento!</dark_gray>"),
             load("messages.yml").getStringList("items.menu-lore"));
         assertNotNull(load("messages.yml").getString("winner.chat"));
+        assertTrue(load("messages.yml").getString("review.actionbar").contains("<speed-slow>"));
+        assertEquals("Velocidad", load("messages.yml").getString("review.speed-name").replaceAll("<[^>]+>", ""));
+        assertEquals(0.05D, load("config.yml").getDouble("review.speed-slow"));
+        assertEquals(0.10D, load("config.yml").getDouble("review.speed-normal"));
+        assertEquals(0.20D, load("config.yml").getDouble("review.speed-fast"));
         assertEquals("SAVE_TEMPLATE", load("menus/main-admin.yml").getString("items.save-template.action"));
         assertEquals("REVIEW_START", load("menus/start-event.yml").getString("items.review-start.action"));
         assertEquals(21, load("menus/start-event.yml").getInt("items.review-start.slot"));
-        assertEquals("1.0.8", load("biome-names.yml").getString("config-version"));
+        assertEquals("1.0.9", load("biome-names.yml").getString("config-version"));
         assertNotNull(load("biome-names.yml").getConfigurationSection("names.minecraft"));
         assertEquals("com.furryplace.event.FurryplaceEventPlugin", load("plugin.yml").getString("main"));
     }

@@ -4,8 +4,8 @@
 
 1. Stop the server and back up `lobby`, `place`, and `place-template`.
 2. Install PacketEvents 2.13.0 in the server's `plugins` folder.
-3. Copy `FurryplaceEvent-1.0.8.jar` into `plugins` and start Leaf 26.2.
-4. Confirm the console prints `FurryplaceEvent 1.0.8 está listo.`
+3. Copy `FurryplaceEvent-1.0.9.jar` into `plugins` and start Leaf 26.2.
+4. Confirm the console prints `FurryplaceEvent 1.0.9 está listo.`
 
 Every player receives the persistent FurryPlace menu Nether Star in hotbar slot 8. It remains available in every world and opens the same menu as `/furryplace menu`.
 
@@ -19,6 +19,8 @@ The plugin does not create missing worlds. If `place` or `place-template` is mis
 2. Run `/furryplace portal-wand`, then right-click a Nether Portal block in `lobby`.
 3. Run `/furryplace template generate` and confirm the menu. This creates the default ground with a two-block-wide andesite outline level with the grass in `place-template`, captures it, and keeps players in the lobby while progress is shown.
 4. If desired, edit the finished `place-template` manually. While standing in `place-template`, open `/furryplace menu` and click **Guardar plantilla** to capture the edits and return to lobby. Starting the event also freezes the current edited template; do not run `template generate` again, because that command intentionally restores the default template first.
+
+During review, every viewer receives **Velocidad** (FEATHER) in hotbar slot 5. Judges and Admins also receive **Modificar parcela** in slot 6: the red STONE_PICKAXE enables read-only mode and the green DIAMOND_PICKAXE enables editing. Both mouse buttons work. The speed cycles Slow (0.05), Normal (0.10), and Fast (0.20), and the selected value is shown in the review Action Bar. These temporary controls intentionally overwrite slots 5 and 6; when review ends, both slots are cleared rather than restored.
 
 Do not stop the server while setup is running unless necessary. If it does stop, the journal restarts the interrupted job safely on the next startup.
 
@@ -59,4 +61,4 @@ From the project directory:
 mvn -Dmaven.repo.local=.m2-local clean test package
 ```
 
-The JAR is created at `target/FurryplaceEvent-1.0.8.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.
+The JAR is created at `target/FurryplaceEvent-1.0.9.jar`. Source tests cannot prove packet visuals; verify hardcore hearts, sign input, biome overlays, and biome restoration with real 26.2 clients before the event.

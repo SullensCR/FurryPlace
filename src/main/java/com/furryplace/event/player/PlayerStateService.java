@@ -28,7 +28,7 @@ public final class PlayerStateService implements PlotService.EntryHandler {
         private PlayerStateSnapshot event;
     }
 
-    private record ViewState(GameMode gameMode, boolean allowFlight, boolean flying) {}
+    private record ViewState(GameMode gameMode, boolean allowFlight, boolean flying, float flySpeed) {}
 
     private final JavaPlugin plugin;
     private final Path directory;
@@ -79,7 +79,7 @@ public final class PlayerStateService implements PlotService.EntryHandler {
 
     public void activateViewer(Player player) {
         leaveOwnerState(player);
-        viewStates.putIfAbsent(player.getUniqueId(), new ViewState(player.getGameMode(), player.getAllowFlight(), player.isFlying()));
+        viewStates.putIfAbsent(player.getUniqueId(), new ViewState(player.getGameMode(), player.getAllowFlight(), player.isFlying(), player.getFlySpeed()));
         player.setGameMode(GameMode.SURVIVAL);
         player.setAllowFlight(true);
         player.setFlying(true);
@@ -92,6 +92,7 @@ public final class PlayerStateService implements PlotService.EntryHandler {
             player.setGameMode(viewing.gameMode());
             player.setAllowFlight(viewing.allowFlight());
             player.setFlying(viewing.flying() && viewing.allowFlight());
+            player.setFlySpeed(viewing.flySpeed());
         }
         player.resetPlayerWeather();
         player.resetPlayerTime();
@@ -114,7 +115,8 @@ public final class PlayerStateService implements PlotService.EntryHandler {
             data.marker = Marker.RESTORE_NORMAL;
             saveNow(player.getUniqueId(), data);
         }
-        viewStates.remove(player.getUniqueId());
+        ViewState viewing = viewStates.remove(player.getUniqueId());
+        if (viewing != null) restoreViewingState(player, viewing);
     }
 
     public void shutdown(Iterable<? extends Player> players) {
@@ -126,6 +128,10 @@ public final class PlayerStateService implements PlotService.EntryHandler {
 
     public boolean isInEventState(Player player) {
         return data(player.getUniqueId()).mode == Mode.EVENT;
+    }
+
+    public boolean isViewing(Player player) {
+        return viewStates.containsKey(player.getUniqueId());
     }
 
     public void clearEventData() {
@@ -158,6 +164,13 @@ public final class PlayerStateService implements PlotService.EntryHandler {
         data.mode = Mode.NORMAL;
         data.marker = Marker.NONE;
         saveNow(player.getUniqueId(), data);
+    }
+
+    private void restoreViewingState(Player player, ViewState viewing) {
+        player.setGameMode(viewing.gameMode());
+        player.setAllowFlight(viewing.allowFlight());
+        player.setFlying(viewing.flying() && viewing.allowFlight());
+        player.setFlySpeed(viewing.flySpeed());
     }
 
     private Data data(UUID uuid) {

@@ -5,6 +5,7 @@ import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.packet.PacketBridge;
 import com.furryplace.event.persistence.StateRepository;
+import com.furryplace.event.review.ReviewControlService;
 import com.furryplace.event.service.EventCoordinator;
 import com.furryplace.event.service.MessageService;
 import com.furryplace.event.world.PlotService;
@@ -32,6 +33,7 @@ public final class PlayerLifecycleListener implements Listener {
     private final PacketBridge packets;
     private final EventCoordinator coordinator;
     private final MessageService messages;
+    private final ReviewControlService reviewControls;
     private final Map<UUID, Integer> membership = new HashMap<>();
     private final Map<UUID, Location> lastGrounded = new HashMap<>();
     private final Map<UUID, Long> recoveryCooldown = new HashMap<>();
@@ -39,7 +41,8 @@ public final class PlayerLifecycleListener implements Listener {
 
     public PlayerLifecycleListener(JavaPlugin plugin, RuntimeState state, StateRepository repository,
                                    PlotService plots, PlayerStateService playerStates, PacketBridge packets,
-                                   EventCoordinator coordinator, MessageService messages) {
+                                   EventCoordinator coordinator, MessageService messages,
+                                   ReviewControlService reviewControls) {
         this.plugin = plugin;
         this.state = state;
         this.repository = repository;
@@ -48,6 +51,7 @@ public final class PlayerLifecycleListener implements Listener {
         this.packets = packets;
         this.coordinator = coordinator;
         this.messages = messages;
+        this.reviewControls = reviewControls;
         xpLevel = plugin.getConfig().getInt("presentation.xp-level", 2026);
         Bukkit.getScheduler().runTaskTimer(plugin, () -> Bukkit.getOnlinePlayers().forEach(this::forceXp), 40L, 40L);
     }
@@ -64,14 +68,15 @@ public final class PlayerLifecycleListener implements Listener {
     }
 
     public void sendLobby(Player player) {
+        packets.clearPlot(player);
+        reviewControls.leaveReview(player);
+        playerStates.leavePlace(player);
+        membership.remove(player.getUniqueId());
         Location lobby = lobbySpawn();
         if (lobby == null) {
             messages.send(player, "errors.worlds-missing");
             return;
         }
-        packets.clearPlot(player);
-        playerStates.leavePlace(player);
-        membership.remove(player.getUniqueId());
         player.teleportAsync(lobby);
     }
 
@@ -114,6 +119,8 @@ public final class PlayerLifecycleListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         coordinator.controllerDisconnected(player.getUniqueId());
+        plots.playerDisconnected(player.getUniqueId());
+        reviewControls.leaveReview(player);
         playerStates.onQuit(player);
         packets.cancelSign(player.getUniqueId());
         membership.remove(player.getUniqueId());
@@ -165,9 +172,18 @@ public final class PlayerLifecycleListener implements Listener {
         PlotRecord newPlot = plots.plotAt(location).filter(plot -> plots.isInterior(plot, location)).orElse(null);
         Integer previous = membership.get(player.getUniqueId());
         Integer next = newPlot == null ? null : newPlot.index();
-        if (java.util.Objects.equals(previous, next)) return;
+        if (java.util.Objects.equals(previous, next)) {
+            if (newPlot != null && state.stage() == EventStage.REVIEWING) reviewControls.ensure(player);
+            else if (newPlot == null && playerStates.isViewing(player)) {
+                reviewControls.leaveReview(player);
+                playerStates.leavePlace(player);
+            }
+            return;
+        }
         if (previous != null) {
             packets.clearPlot(player);
+            if (state.stage() == EventStage.REVIEWING && newPlot != null) reviewControls.leavePlot(player);
+            else reviewControls.leaveReview(player);
             playerStates.leavePlace(player);
         }
         if (newPlot == null) {
@@ -179,6 +195,7 @@ public final class PlayerLifecycleListener implements Listener {
             && newPlot.ownerId().equals(player.getUniqueId()) && player.hasPermission("furryplace.player")) playerStates.activateOwner(player);
         else playerStates.activateViewer(player);
         packets.applyPlot(player, newPlot);
+        if (state.stage() == EventStage.REVIEWING) reviewControls.enterPlot(player, newPlot);
     }
 
     private void trackGroundAndVoid(Player player, Location location) {

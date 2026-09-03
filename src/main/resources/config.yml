@@ -28,6 +28,11 @@ presentation:
   warning-cooldown-seconds: 5
   review-actionbar-period-ticks: 20
 
+review:
+  speed-slow: 0.05
+  speed-normal: 0.10
+  speed-fast: 0.20
+
 portal:
   flood-fill-limit: 1024
   pushback-horizontal: 4.0

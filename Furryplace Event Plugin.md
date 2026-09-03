@@ -23,12 +23,12 @@ Role precedence is always Admin, then Judge, then Player. A staff member who als
   - May create one plot, build inside it while the event is Active, use its wands, browse plots, and cast one community vote.
 - `furryplace.judge`
   - Cannot participate, own a plot, or cast a community vote.
-  - May browse every plot in view-only mode and cast one judge selection during Review and Judging.
-  - Cannot build, break, or interact in contestant plots.
+  - May browse every plot and cast one judge selection during Review and Judging.
+  - During Reviewing, may independently enable temporary editing with **Modificar parcela**.
 - `furryplace.admin`
   - Cannot participate or cast a community vote.
   - Controls the event, timer, template, portal, spawn, review, judging, winner, and reset.
-  - Has a protection bypass and may modify plots even after construction ends.
+  - During Reviewing, editing requires the same temporary **Modificar parcela** toggle as Judges; outside Reviewing the existing Admin bypass remains.
 
 Everyone who is not a Judge or Admin is treated as a Player. `furryplace.player` will also be assigned as the default player node in LuckPerms.
 
@@ -84,7 +84,7 @@ When the timer reaches zero:
 - Incomplete plot generation is canceled and its partial blocks are cleared.
 - Everyone in `place` is returned to the configured lobby spawn.
 - Owner event state is saved and normal state is restored.
-- Contestant plots become view-only for Players and Judges; Admin bypass remains available.
+- Contestant plots become read-only for Players, Judges, and Admins until a Judge/Admin enables their own review editing control.
 - The server waits for an Admin to begin cycling through plots.
 
 The reviewing Admin selects any participant head as the first plot. Remaining plots follow persisted plot-allocation order, wrapping from the final entry back to the first.
@@ -93,7 +93,9 @@ From the Admin manage-event menu, the **Iniciar revisión** button replaces **In
 
 ### Reviewing
 
-- All online players in every world are teleported to the selected plot in survival view-only mode with flight allowed.
+- All online players in every world are teleported to the selected plot in survival view-only mode with flight allowed. Players receive a FEATHER **Velocidad** item in hotbar slot 5. Judges and Admins receive a red STONE_PICKAXE **Modificar parcela** item in slot 6.
+- The speed control cycles Slow (0.05), Normal (0.10), and Fast (0.20) with either mouse button. The modify control also accepts either mouse button and changes to a green DIAMOND_PICKAXE while enabled. The edit toggle affects all protected plot operations and only the currently reviewed plot.
+- These controls intentionally overwrite slots 5 and 6. They are removed when review ends or a viewer leaves `place`; slots 5 and 6 are left empty. Editing resets to disabled on every plot change, while the selected speed remains for the current review session.
 - A joining player is first placed at the configured lobby spawn and then moved to the plot currently being reviewed.
 - The Admin who starts review becomes its controller.
 - Only the controller can use Previous, Next, and End Review.
@@ -103,7 +105,7 @@ From the Admin manage-event menu, the **Iniciar revisión** button replaces **In
 - Previous and repeated visits remain allowed.
 - A persistent Action Bar is shown while reviewing:
 
-  `<yellow>Parcela de <player></yellow> <aqua>(<current>/<total>)</aqua>`
+  `<yellow>Parcela de <player></yellow> <aqua>(<current>/<total>)</aqua> <gray>| Velocidad: <speed-slow> / <speed-normal> / <speed-fast></gray>`
 
 - The Action Bar updates on every transition and is cleared when cycling ends.
 - Judges may add, change, or remove their judge selection during this phase.
@@ -239,6 +241,7 @@ Do not copy:
 - Solid dirt-to-bottom plots must not be generated in one blocking server tick.
 - Plot generation uses a global bounded per-tick work queue with physics disabled and visible Spanish progress in the Action Bar.
 - The player waits at the configured lobby spawn until generation completes.
+- When generation completes successfully, the still-connected owner is automatically teleported into the finished plot once; a disconnect during generation never causes a later automatic teleport.
 - The global event timer continues while players wait.
 - If the event expires first, the partial plot is cleared and the request does not become a participant.
 - At most 50 completed or reserved plot slots may exist.
@@ -287,8 +290,8 @@ Then load that player's persistent event inventory/state and set them to Creativ
 - During Active, an owner inside their own plot is Creative and may build/interact within the interior.
 - Everyone else in `place` is survival view-only with flight enabled.
 - View-only cancels block/entity interaction, placement, breaking, container use, item pickup, and item dropping, except for Admin protection bypass where explicitly allowed.
-- During Reviewing and Complete, all ordinary players and Judges are survival view-only with flight.
-- Admins retain their protection bypass after timeout and completion.
+- During Reviewing and Complete, all ordinary players and Judges are survival view-only with flight. During Reviewing, Judges and Admins may edit only after enabling **Modificar parcela**; ordinary Players remain read-only.
+- Admins retain their protection bypass after timeout and completion, outside Reviewing.
 - When leaving `place`, restore any temporary game-mode and flight values.
 - All damage to players is canceled in `place`, including PvP, fire, lava, explosion, suffocation, fall, and void damage.
 
@@ -397,7 +400,7 @@ Every wand is tagged with Persistent Data Container data and cannot be identifie
 ### General boundary protection
 
 - Owners may modify only their own 80 x 80 interior during Active.
-- Judges are always view-only in contestant plots.
+- During Reviewing, Judges and Admins are read-only until their own **Modificar parcela** control is enabled. The enabled control covers direct and indirect protected operations inside the current reviewed plot.
 - Players viewing another plot are always view-only.
 - After timeout, Players and Judges cannot modify any contestant plot.
 - Admins retain bypass access.

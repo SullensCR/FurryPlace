@@ -5,6 +5,7 @@ import com.furryplace.event.domain.PlotRecord;
 import com.furryplace.event.domain.RuntimeState;
 import com.furryplace.event.player.PlayerLifecycleListener;
 import com.furryplace.event.player.PlayerStateService;
+import com.furryplace.event.review.ReviewControlService;
 import com.furryplace.event.world.PlotService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,15 +21,23 @@ public final class EventRuntimeHooks implements LifecycleHooks {
     private final PlayerLifecycleListener players;
     private final PlayerStateService playerStates;
     private final MessageService messages;
+    private final ReviewControlService reviewControls;
 
     public EventRuntimeHooks(JavaPlugin plugin, RuntimeState state, PlotService plots,
                              PlayerLifecycleListener players, PlayerStateService playerStates, MessageService messages) {
+        this(plugin, state, plots, players, playerStates, messages, null);
+    }
+
+    public EventRuntimeHooks(JavaPlugin plugin, RuntimeState state, PlotService plots,
+                             PlayerLifecycleListener players, PlayerStateService playerStates,
+                             MessageService messages, ReviewControlService reviewControls) {
         this.plugin = plugin;
         this.state = state;
         this.plots = plots;
         this.players = players;
         this.playerStates = playerStates;
         this.messages = messages;
+        this.reviewControls = reviewControls;
         long period = plugin.getConfig().getLong("presentation.review-actionbar-period-ticks", 20L);
         Bukkit.getScheduler().runTaskTimer(plugin, this::reviewActionBar, period, period);
     }
@@ -43,7 +52,10 @@ public final class EventRuntimeHooks implements LifecycleHooks {
     public void reviewMoved(UUID plotOwner) {
         PlotRecord plot = state.plot(plotOwner).orElse(null);
         if (plot == null) return;
-        for (Player player : Bukkit.getOnlinePlayers()) plots.enter(player, plot, false);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (reviewControls != null) reviewControls.leavePlot(player);
+            plots.enter(player, plot, false);
+        }
     }
 
     @Override
@@ -56,6 +68,7 @@ public final class EventRuntimeHooks implements LifecycleHooks {
     @Override
     public void judgingStarted() {
         Bukkit.getOnlinePlayers().forEach(player -> {
+            if (reviewControls != null) reviewControls.leaveReview(player);
             messages.clearActionBar(player);
             players.sendLobby(player);
         });
@@ -68,6 +81,7 @@ public final class EventRuntimeHooks implements LifecycleHooks {
         int communityVotes = state.communityVotes().countFor(winner);
         messages.broadcast("winner.chat", Map.of("player", plot.ownerName(), "votes", Integer.toString(communityVotes)));
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (reviewControls != null) reviewControls.leaveReview(player);
             messages.title(player, "winner.title", "winner.subtitle", Map.of("player", plot.ownerName()));
             plots.enter(player, plot, false);
         }
@@ -87,8 +101,10 @@ public final class EventRuntimeHooks implements LifecycleHooks {
         if (state.stage() != EventStage.REVIEWING || state.review().current() == null) return;
         PlotRecord plot = state.plot(state.review().current()).orElse(null);
         if (plot == null) return;
-        Map<String, Object> values = Map.of("player", plot.ownerName(),
-            "current", state.review().currentIndex() + 1, "total", state.review().order().size());
-        Bukkit.getOnlinePlayers().forEach(player -> messages.actionBar(player, "review.actionbar", values));
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            if (reviewControls == null) messages.actionBar(player, "review.actionbar", Map.of("player", plot.ownerName(),
+                "current", state.review().currentIndex() + 1, "total", state.review().order().size()));
+            else reviewControls.reviewActionBar(player, plot, state.review().currentIndex() + 1, state.review().order().size());
+        });
     }
 }

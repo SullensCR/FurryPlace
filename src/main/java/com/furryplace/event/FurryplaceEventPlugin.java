@@ -16,6 +16,7 @@ import com.furryplace.event.player.PlayerStateService;
 import com.furryplace.event.portal.PortalService;
 import com.furryplace.event.protection.AccessPolicy;
 import com.furryplace.event.protection.ProtectionListener;
+import com.furryplace.event.review.ReviewControlService;
 import com.furryplace.event.service.EventCoordinator;
 import com.furryplace.event.service.EventRuntimeHooks;
 import com.furryplace.event.service.MessageService;
@@ -33,6 +34,7 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
     private BlockOperationQueue operations;
     private PlayerStateService playerStates;
     private PacketBridge packets;
+    private ReviewControlService reviewControls;
 
     @Override
     public void onEnable() {
@@ -71,24 +73,27 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
             repository.save(state);
         }
         playerStates = new PlayerStateService(this);
-        MenuService menus = new MenuService(this, state, packets, messages);
+        reviewControls = new ReviewControlService(this, state, plots, messages);
+        BedrockFormGateway bedrockForms = bedrockForms();
+        MenuService menus = new MenuService(this, state, packets, messages, bedrockForms);
         WandService wands = new WandService(this, state, plots, menus, messages);
         coordinator = new EventCoordinator(this, state, repository, messages);
         PlayerLifecycleListener lifecycle = new PlayerLifecycleListener(this, state, repository, plots, playerStates,
-            packets, coordinator, messages);
+            packets, coordinator, messages, reviewControls);
         plots.entryHandler(playerStates);
         PortalService portal = new PortalService(this, state, repository, messages);
         portal.router(lifecycle::routeForStage);
-        ProtectionListener protection = new ProtectionListener(this, new AccessPolicy(state, plots), plots, messages, wands);
+        ProtectionListener protection = new ProtectionListener(this, new AccessPolicy(state, plots, reviewControls), plots, messages, wands);
         FurryplaceCommand command = new FurryplaceCommand(state, repository, coordinator, plots, lifecycle, portal,
-            wands, menus, packets, messages, bedrockForms());
+            wands, menus, packets, messages, bedrockForms);
         MenuItemService menuItem = new MenuItemService(this, messages, command::openMain);
         menus.actions(command);
-        coordinator.hooks(new EventRuntimeHooks(this, state, plots, lifecycle, playerStates, messages));
+        coordinator.hooks(new EventRuntimeHooks(this, state, plots, lifecycle, playerStates, messages, reviewControls));
 
         Bukkit.getPluginManager().registerEvents(menus, this);
         Bukkit.getPluginManager().registerEvents(wands, this);
         Bukkit.getPluginManager().registerEvents(menuItem, this);
+        Bukkit.getPluginManager().registerEvents(reviewControls, this);
         Bukkit.getPluginManager().registerEvents(portal, this);
         Bukkit.getPluginManager().registerEvents(protection, this);
         Bukkit.getPluginManager().registerEvents(lifecycle, this);
@@ -109,7 +114,7 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
         }
         try {
             return (BedrockFormGateway) Class.forName("com.furryplace.event.bedrock.FloodgateFormGateway")
-                .getConstructor().newInstance();
+                .getConstructor(JavaPlugin.class).newInstance(this);
         } catch (ReflectiveOperationException exception) {
             getLogger().warning("No se pudo activar el puente de formularios Bedrock: " + exception.getMessage());
             return new UnavailableBedrockFormGateway();
@@ -120,6 +125,7 @@ public final class FurryplaceEventPlugin extends JavaPlugin {
     public void onDisable() {
         if (coordinator != null) coordinator.stopTicker();
         if (operations != null) operations.stop();
+        if (reviewControls != null) reviewControls.cleanupAll();
         if (playerStates != null) playerStates.shutdown(Bukkit.getOnlinePlayers());
         if (packets != null) packets.unregister();
         if (repository != null && state != null) {
